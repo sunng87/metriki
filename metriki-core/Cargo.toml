@@ -1,0 +1,12 @@
+[package]
+name = "metriki-core"
+version = "0.1.0"
+authors = ["Ning Sun <sunng@protonmail.com>"]
+edition = "2018"
+description = "A metrics library ported from dropwizard metrics"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+exponential-decay-histogram = "0.1.8"
