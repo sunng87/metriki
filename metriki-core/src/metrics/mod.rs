@@ -1,5 +1,7 @@
+mod meter;
+
 pub enum Metric {
-    Meter,
+    Meter(meter::Meter),
     Timer,
     Gauge,
     Histogram,
