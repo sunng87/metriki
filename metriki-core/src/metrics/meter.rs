@@ -4,6 +4,7 @@ use crossbeam::atomic::AtomicCell;
 
 use crate::utils;
 
+#[derive(Debug)]
 pub struct Meter {
     moving_avarages: ExponentiallyWeightedMovingAverages,
 }
@@ -37,6 +38,7 @@ impl Meter {
     }
 }
 
+#[derive(Debug)]
 struct ExponentiallyWeightedMovingAverage {
     alpha: f64,
     interval_nanos: u64,
@@ -81,6 +83,7 @@ impl ExponentiallyWeightedMovingAverage {
     }
 }
 
+#[derive(Debug)]
 struct ExponentiallyWeightedMovingAverages {
     m1: ExponentiallyWeightedMovingAverage,
     m5: ExponentiallyWeightedMovingAverage,
