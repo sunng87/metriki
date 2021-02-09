@@ -3,6 +3,8 @@ use std::sync::{Arc, RwLock};
 
 use crate::metrics::{Meter, Metric};
 
+/// Entrypoint of all metrics
+///
 #[derive(Default, Debug)]
 pub struct MetricsRegistry {
     inner: Arc<RwLock<Inner>>,
