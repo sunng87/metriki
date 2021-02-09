@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 mod meter;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Metric {
     Meter(Arc<Meter>),
     Timer,

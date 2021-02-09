@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 use crate::metrics::{Meter, Metric};
 
 #[derive(Default, Debug)]
 pub struct MetricsRegistry {
-    inner: Arc<Mutex<Inner>>,
+    inner: Arc<RwLock<Inner>>,
 }
 
 #[derive(Default, Debug)]
@@ -17,11 +17,12 @@ impl MetricsRegistry {
     /// Return `Meter` that has been registered or just created and resgitered.
     /// Panic if a metric is already register but is not meter
     pub fn meter(&self, name: &str) -> Arc<Meter> {
-        let mut inner = self.inner.lock().unwrap();
+        let inner = self.inner.read().unwrap();
 
         if !inner.metrics.contains_key(name) {
+            let mut inner_write = self.inner.write().unwrap();
             let meter = Meter::new();
-            inner
+            inner_write
                 .metrics
                 .insert(name.to_owned(), Metric::Meter(Arc::new(meter)));
         }
@@ -31,5 +32,10 @@ impl MetricsRegistry {
             Metric::Meter(ref m) => m.clone(),
             _ => panic!("A metric with same name and different type is already registered."),
         }
+    }
+
+    pub fn snapshots(&self) -> HashMap<String, Metric> {
+        let inner = self.inner.read().unwrap();
+        inner.metrics.clone()
     }
 }
