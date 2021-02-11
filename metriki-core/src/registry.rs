@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-use crate::metrics::{Histogram, Meter, Metric};
+use crate::metrics::{Counter, Histogram, Meter, Metric};
 
 /// Entrypoint of all metrics
 ///
@@ -50,6 +50,24 @@ impl MetricsRegistry {
         let metric = inner.metrics.get(name).unwrap();
         match metric {
             Metric::Histogram(ref m) => m.clone(),
+            _ => panic!("A metric with same name and different type is already registered."),
+        }
+    }
+
+    pub fn counter(&self, name: &str) -> Arc<Counter> {
+        let inner = self.inner.read().unwrap();
+
+        if !inner.metrics.contains_key(name) {
+            let mut inner_write = self.inner.write().unwrap();
+            let counter = Counter::new();
+            inner_write
+                .metrics
+                .insert(name.to_owned(), Metric::Counter(Arc::new(counter)));
+        }
+
+        let metric = inner.metrics.get(name).unwrap();
+        match metric {
+            Metric::Counter(ref m) => m.clone(),
             _ => panic!("A metric with same name and different type is already registered."),
         }
     }

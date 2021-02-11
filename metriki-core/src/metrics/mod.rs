@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+mod counter;
 mod histogram;
 mod meter;
 
@@ -9,8 +10,9 @@ pub enum Metric {
     Timer,
     Gauge,
     Histogram(Arc<Histogram>),
-    Counter,
+    Counter(Arc<Counter>),
 }
 
+pub use counter::Counter;
 pub use histogram::Histogram;
 pub use meter::Meter;
