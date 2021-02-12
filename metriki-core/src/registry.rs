@@ -16,6 +16,10 @@ struct Inner {
 }
 
 impl MetricsRegistry {
+    pub fn new() -> MetricsRegistry {
+        MetricsRegistry::default()
+    }
+
     /// Return `Meter` that has been registered or just created and resgitered.
     /// Panic if a metric is already register but is not meter
     pub fn meter(&self, name: &str) -> Arc<Meter> {
