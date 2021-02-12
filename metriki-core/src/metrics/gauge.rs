@@ -1,6 +1,6 @@
 use std::fmt;
 
-pub type GaugeFn = Box<dyn Fn() -> f64>;
+pub type GaugeFn = Box<dyn Fn() -> f64 + Send + Sync>;
 
 pub struct Gauge {
     func: GaugeFn,
