@@ -26,14 +26,17 @@ impl Meter {
     }
 
     pub fn m1_rate(&self) -> f64 {
+        self.moving_avarages.tick_if_needed();
         self.moving_avarages.m1_rate()
     }
 
     pub fn m5_rate(&self) -> f64 {
+        self.moving_avarages.tick_if_needed();
         self.moving_avarages.m5_rate()
     }
 
     pub fn m15_rate(&self) -> f64 {
+        self.moving_avarages.tick_if_needed();
         self.moving_avarages.m15_rate()
     }
 }
@@ -63,11 +66,11 @@ impl ExponentiallyWeightedMovingAverage {
     }
 
     fn tick(&self) {
-        let count = self.uncounted.load();
+        let count = self.uncounted.swap(0);
         let instant_rate = count as f64 / self.interval_nanos as f64;
 
-        if let Some(rate) = self.rate.load() {
-            let new_rate = rate + (self.alpha * (instant_rate - rate));
+        if let Some(prev_rate) = self.rate.load() {
+            let new_rate = prev_rate + (self.alpha * (instant_rate - prev_rate));
             self.rate.store(Some(new_rate));
         } else {
             self.rate.store(Some(instant_rate));
@@ -94,7 +97,7 @@ struct ExponentiallyWeightedMovingAverages {
 
 #[inline]
 fn alpha(interval_secs: u64, minutes: u64) -> f64 {
-    1f64 - (-(interval_secs as f64) / 60f64 / minutes as f64).exp()
+    1.0 - (-(interval_secs as f64) / 60.0 / minutes as f64).exp()
 }
 
 const DEFAULT_INTERVAL_SECS: u64 = 5;
