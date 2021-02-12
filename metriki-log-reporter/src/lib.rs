@@ -9,16 +9,18 @@ use metriki_core::MetricsRegistry;
 
 #[derive(Builder, Debug)]
 pub struct LogReporter {
-    #[builder(default)]
+    #[builder(default, setter(into))]
     prefix: String,
     registry: Arc<MetricsRegistry>,
+    #[builder(default = "5")]
     interval_secs: u64,
+    #[builder(default = "Level::Info")]
     level: Level,
 }
 
 impl LogReporter {
     pub fn start(self) {
-        let looper = move || {
+        let looper = move || loop {
             let metrics = self.registry.snapshots();
             for (ref key, metric) in metrics {
                 match metric {
