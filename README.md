@@ -13,7 +13,7 @@ This library is a work in progress.
   - [x] gauge
   - [x] counter
 - Reporters
-  - [ ] logger
+  - [x] logger
   - [ ] influxdb
   - [ ] riemann
 - Instruments
