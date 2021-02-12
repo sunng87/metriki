@@ -11,5 +11,4 @@ keywords = ["observability", "metrics", "monitoring"]
 
 [dependencies]
 crossbeam = "0.8"
-#exponential-decay-histogram = "0.1"
-exponential-decay-histogram = { git = "https://github.com/sfackler/exponential-decay-histogram.git" }
+exponential-decay-histogram = "0.1.9"
