@@ -8,10 +8,10 @@ This library is a work in progress.
 
 - Metrics
   - [x] meter
-  - [ ] histogram
-  - [ ] timer
-  - [ ] gauge
-  - [ ] counter
+  - [x] histogram
+  - [x] timer
+  - [x] gauge
+  - [x] counter
 - Reporters
   - [ ] logger
   - [ ] influxdb
