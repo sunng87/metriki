@@ -90,6 +90,13 @@ impl MetricsRegistry {
         }
     }
 
+    pub fn gauge(&self, name: &str, func: GaugeFn) {
+        let mut inner = self.inner.write().unwrap();
+        inner
+            .metrics
+            .insert(name.to_owned(), Metric::Gauge(Arc::new(Gauge::new(func))));
+    }
+
     pub fn snapshots(&self) -> HashMap<String, Metric> {
         let inner = self.inner.read().unwrap();
         inner.metrics.clone()
