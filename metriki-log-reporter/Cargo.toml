@@ -1,6 +1,6 @@
 [package]
 name = "metriki-log-reporter"
-version = "0.1.0"
+version = "0.1.1-alpha.0"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Log reporter for metriki"
@@ -11,5 +11,5 @@ keywords = ["observability", "metrics", "monitoring"]
 
 [dependencies]
 log = "0.4"
-metriki-core = { path = "../metriki-core", version = "0.1.0" }
+metriki-core = { path = "../metriki-core", version = "0.1.1-alpha.0" }
 derive_builder = "0.9.0"
