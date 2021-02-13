@@ -10,5 +10,5 @@ keywords = ["observability", "metrics", "monitoring"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crossbeam = "0.8"
+crossbeam-utils = "0.8"
 exponential-decay-histogram = "0.1.9"
