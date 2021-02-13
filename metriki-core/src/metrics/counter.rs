@@ -6,7 +6,7 @@ pub struct Counter {
 }
 
 impl Counter {
-    pub fn new() -> Counter {
+    pub(crate) fn new() -> Counter {
         Counter {
             value: AtomicI64::new(0),
         }

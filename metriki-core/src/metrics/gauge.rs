@@ -7,7 +7,7 @@ pub struct Gauge {
 }
 
 impl Gauge {
-    pub fn new(f: GaugeFn) -> Gauge {
+    pub(crate) fn new(f: GaugeFn) -> Gauge {
         Gauge { func: f }
     }
 

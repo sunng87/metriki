@@ -12,7 +12,7 @@ pub struct HistogramSnapshot {
 }
 
 impl Histogram {
-    pub fn new() -> Histogram {
+    pub(crate) fn new() -> Histogram {
         let inner = ExponentialDecayHistogram::builder().build();
 
         Histogram {

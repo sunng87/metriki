@@ -15,7 +15,7 @@ pub struct TimerContext<'a> {
 }
 
 impl Timer {
-    pub fn new() -> Timer {
+    pub(crate) fn new() -> Timer {
         Timer {
             rate: Meter::new(),
             latency: Histogram::new(),

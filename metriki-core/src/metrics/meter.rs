@@ -10,7 +10,7 @@ pub struct Meter {
 }
 
 impl Meter {
-    pub fn new() -> Meter {
+    pub(crate) fn new() -> Meter {
         Meter {
             moving_avarages: ExponentiallyWeightedMovingAverages::new(),
         }
@@ -53,7 +53,7 @@ struct ExponentiallyWeightedMovingAverage {
 impl ExponentiallyWeightedMovingAverage {
     fn new(alpha: f64, interval_secs: u64) -> ExponentiallyWeightedMovingAverage {
         ExponentiallyWeightedMovingAverage {
-            alpha: alpha,
+            alpha,
             interval_nanos: utils::secs_to_nanos(interval_secs),
 
             uncounted: AtomicCell::new(0),
@@ -140,7 +140,11 @@ impl ExponentiallyWeightedMovingAverages {
         if tick_age > DEFAULT_INTERVAL_MILLIS {
             let latest_tick =
                 current_tick - Duration::from_millis(tick_age % DEFAULT_INTERVAL_MILLIS);
-            if let Ok(_) = self.last_tick.compare_exchange(previous_tick, latest_tick) {
+            if self
+                .last_tick
+                .compare_exchange(previous_tick, latest_tick)
+                .is_ok()
+            {
                 let required_ticks = tick_age / DEFAULT_INTERVAL_MILLIS;
                 for _ in 0..required_ticks {
                     self.m1.tick();
