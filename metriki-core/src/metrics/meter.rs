@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use crossbeam::atomic::AtomicCell;
+use crossbeam_utils::atomic::AtomicCell;
 
 use crate::utils;
 
