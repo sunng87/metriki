@@ -17,7 +17,7 @@ This library is a work in progress.
   - [ ] influxdb
   - [ ] riemann
 - Instruments
-  - [ ] warp
+  - [x] warp
   - [ ] reqwest
 
 ## License

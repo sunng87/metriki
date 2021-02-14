@@ -1,4 +1,4 @@
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["metriki-core", "metriki-log-reporter"]
+members = ["metriki-core", "metriki-log-reporter", "metriki-warp"]
