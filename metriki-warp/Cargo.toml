@@ -14,4 +14,5 @@ documentation = "https://docs.rs/metriki-warp/"
 
 [dependencies]
 warp = "0.3"
+http = "0.2"
 metriki-core = { path = "../metriki-core", version = "^0.1.2-alpha.0"}
