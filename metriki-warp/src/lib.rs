@@ -12,7 +12,7 @@ use warp::{self, Filter};
 /// use metriki_warp::with_metrics;
 /// use warp::{self, Filter};
 ///
-/// let metrics = Arc::new(MetricsRegistry::new());
+/// let metrics = MetricsRegistry::new();
 /// let router = warp::get()
 ///   .and(with_metrics(metrics))
 ///   .map(|mtk: Arc<MetricsRegistry>| {
