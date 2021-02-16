@@ -16,12 +16,17 @@ struct Inner {
 }
 
 impl MetricsRegistry {
+    /// Create a default metrics registry.
     pub fn new() -> MetricsRegistry {
         MetricsRegistry::default()
     }
 
-    /// Return `Meter` that has been registered or just created and resgitered.
-    /// Panic if a metric is already register but is not meter
+    /// Return `Meter` that has been registered and create if not found.
+    ///
+    /// Meter a metric to measure rate of an event. It will report rate in 1 minute,
+    /// 5 minutes and 15 minutes, which is similar to Linux load.
+    ///
+    /// This function may panic if a metric is already registered with type other than meter.
     pub fn meter(&self, name: &str) -> Arc<Meter> {
         let meter = {
             let inner = self.inner.read().unwrap();
@@ -44,6 +49,12 @@ impl MetricsRegistry {
         }
     }
 
+    /// Return `Histogram` that has been registered and create if not found.
+    ///
+    /// Histogram a metric to measure distribution of a series of data. The distribution will
+    /// be reported with `max`, `min`, `mean`, `stddev` and the value at particular percentile.
+    ///
+    /// This function may panic if a metric is already registered with type other than histogram.
     pub fn histogram(&self, name: &str) -> Arc<Histogram> {
         let histo = {
             let inner = self.inner.read().unwrap();
@@ -66,6 +77,11 @@ impl MetricsRegistry {
         }
     }
 
+    /// Return `Counter` that has been registered and create if not found.
+    ///
+    /// Counter a metric to measure the number of some state.
+    ///
+    /// This function may panic if a metric is already registered with type other than counter.
     pub fn counter(&self, name: &str) -> Arc<Counter> {
         let counter = {
             let inner = self.inner.read().unwrap();
@@ -88,6 +104,12 @@ impl MetricsRegistry {
         }
     }
 
+    /// Return `Timer` that has been registered and create if not found.
+    ///
+    /// Timer is a combination of meter and histogram. The meter part is to track rate of
+    /// the event. And the histogram part maintains the distribution of time spent for the event.
+    ///
+    /// This function may panic if a metric is already registered with type other than counter.
     pub fn timer(&self, name: &str) -> Arc<Timer> {
         let timer = {
             let inner = self.inner.read().unwrap();
@@ -110,6 +132,9 @@ impl MetricsRegistry {
         }
     }
 
+    /// Register a `Gauge` with given function.
+    ///
+    /// The guage will return a value when any reporter wants to fetch data from it.
     pub fn gauge(&self, name: &str, func: GaugeFn) {
         let mut inner = self.inner.write().unwrap();
         inner
@@ -117,6 +142,9 @@ impl MetricsRegistry {
             .insert(name.to_owned(), Metric::Gauge(Arc::new(Gauge::new(func))));
     }
 
+    /// Returns all the metrics hold in the registry.
+    ///
+    /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
         let inner = self.inner.read().unwrap();
         inner.metrics.clone()
