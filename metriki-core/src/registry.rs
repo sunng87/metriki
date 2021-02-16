@@ -17,8 +17,8 @@ struct Inner {
 
 impl MetricsRegistry {
     /// Create a default metrics registry.
-    pub fn new() -> MetricsRegistry {
-        MetricsRegistry::default()
+    pub fn new() -> Arc<MetricsRegistry> {
+        Arc::new(MetricsRegistry::default())
     }
 
     /// Return `Meter` that has been registered and create if not found.
