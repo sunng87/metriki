@@ -61,35 +61,35 @@ impl LogReporter {
             "{}{}.p50={}",
             self.prefix,
             name,
-            snapshot.quantile(50.0)
+            snapshot.quantile(0.5)
         );
         log!(
             self.level,
             "{}{}.p75={}",
             self.prefix,
             name,
-            snapshot.quantile(75.0)
+            snapshot.quantile(0.75)
         );
         log!(
             self.level,
             "{}{}.p90={}",
             self.prefix,
             name,
-            snapshot.quantile(90.0)
+            snapshot.quantile(0.9)
         );
         log!(
             self.level,
             "{}{}.p99={}",
             self.prefix,
             name,
-            snapshot.quantile(99.0)
+            snapshot.quantile(0.99)
         );
         log!(
             self.level,
             "{}{}.p999={}",
             self.prefix,
             name,
-            snapshot.quantile(999.0)
+            snapshot.quantile(0.999)
         );
         log!(self.level, "{}{}.max={}", self.prefix, name, snapshot.max());
         log!(self.level, "{}{}.min={}", self.prefix, name, snapshot.min());
