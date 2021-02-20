@@ -20,6 +20,10 @@ This library is a work in progress.
   - [x] warp
   - [ ] reqwest
 
+## Docs
+
+- [metriki-core](https://docs.rs/metriki-core/)
+
 ## License
 
 MIT/Apache-2.0
