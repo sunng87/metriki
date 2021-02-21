@@ -1,6 +1,6 @@
 [package]
 name = "metriki-log-reporter"
-version = "0.1.1-alpha.0"
+version = "0.1.1"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Log reporter for metriki"
