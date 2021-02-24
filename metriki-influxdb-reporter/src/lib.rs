@@ -3,7 +3,8 @@ use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use derive_builder::Builder;
-use influxdb::{Client, InfluxDbWriteable, Query, Timestamp, WriteQuery};
+use futures::executor;
+use influxdb::{Client, InfluxDbWriteable, Timestamp};
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 
@@ -77,7 +78,7 @@ impl InfluxDbReporter {
             .add_field("m15", meter.m15_rate());
 
         //TODO: query response
-        client.query(&q);
+        let _ = executor::block_on(client.query(&q));
     }
 
     fn report_gauge(&self, client: &Client, name: &str, gauge: &Gauge) {
@@ -86,7 +87,7 @@ impl InfluxDbReporter {
             .into_query(self.measurement(name))
             .add_field("value", value);
 
-        client.query(&q);
+        let _ = executor::block_on(client.query(&q));
     }
 
     fn report_histogram(&self, client: &Client, name: &str, snapshot: &HistogramSnapshot) {
@@ -101,7 +102,7 @@ impl InfluxDbReporter {
             .add_field("max", snapshot.max())
             .add_field("mean", snapshot.mean());
 
-        client.query(&q);
+        let _ = executor::block_on(client.query(&q));
     }
 
     fn report_counter(&self, client: &Client, name: &str, c: &Counter) {
@@ -109,7 +110,7 @@ impl InfluxDbReporter {
             .into_query(self.measurement(name))
             .add_field("value", c.value());
 
-        client.query(&q);
+        let _ = executor::block_on(client.query(&q));
     }
 
     fn report_timer(&self, client: &Client, name: &str, t: &Timer) {
@@ -130,6 +131,6 @@ impl InfluxDbReporter {
             .add_field("m5", rate.m5_rate())
             .add_field("m15", rate.m15_rate());
 
-        client.query(&q);
+        let _ = executor::block_on(client.query(&q));
     }
 }
