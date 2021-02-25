@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use derive_builder::Builder;
 use futures::executor;
-use influxdb::{Client, InfluxDbWriteable, Timestamp};
+use influxdb::{Client, InfluxDbWriteable, Timestamp, WriteQuery};
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 
@@ -23,7 +24,8 @@ pub struct InfluxDbReporter {
     password: Option<String>,
     #[builder(default, setter(into))]
     measurement_prefix: String,
-    //TODO: tags
+    #[builder(setter)]
+    tags: HashMap<String, String>,
 }
 
 fn system_time_millis() -> u128 {
@@ -70,9 +72,21 @@ impl InfluxDbReporter {
         format!("{}{}", self.measurement_prefix, name)
     }
 
+    #[inline]
+    fn with_query(&self, name: &str) -> WriteQuery {
+        let mut query =
+            Timestamp::Milliseconds(system_time_millis()).into_query(self.measurement(name));
+
+        for (k, v) in self.tags.iter() {
+            query = query.add_tag(k, v.clone());
+        }
+
+        query
+    }
+
     fn report_meter(&self, client: &Client, name: &str, meter: &Meter) {
-        let q = Timestamp::Milliseconds(system_time_millis())
-            .into_query(self.measurement(name))
+        let q = self
+            .with_query(name)
             .add_field("m1", meter.m1_rate())
             .add_field("m5", meter.m5_rate())
             .add_field("m15", meter.m15_rate());
@@ -83,16 +97,14 @@ impl InfluxDbReporter {
 
     fn report_gauge(&self, client: &Client, name: &str, gauge: &Gauge) {
         let value = gauge.value();
-        let q = Timestamp::Milliseconds(system_time_millis())
-            .into_query(self.measurement(name))
-            .add_field("value", value);
+        let q = self.with_query(name).add_field("value", value);
 
         let _ = executor::block_on(client.query(&q));
     }
 
     fn report_histogram(&self, client: &Client, name: &str, snapshot: &HistogramSnapshot) {
-        let q = Timestamp::Milliseconds(system_time_millis())
-            .into_query(self.measurement(name))
+        let q = self
+            .with_query(name)
             .add_field("p50", snapshot.quantile(0.5))
             .add_field("p75", snapshot.quantile(0.75))
             .add_field("p90", snapshot.quantile(0.90))
@@ -106,9 +118,7 @@ impl InfluxDbReporter {
     }
 
     fn report_counter(&self, client: &Client, name: &str, c: &Counter) {
-        let q = Timestamp::Milliseconds(system_time_millis())
-            .into_query(self.measurement(name))
-            .add_field("value", c.value());
+        let q = self.with_query(name).add_field("value", c.value());
 
         let _ = executor::block_on(client.query(&q));
     }
@@ -117,8 +127,8 @@ impl InfluxDbReporter {
         let rate = t.rate();
         let latency = t.latency();
 
-        let q = Timestamp::Milliseconds(system_time_millis())
-            .into_query(self.measurement(name))
+        let q = self
+            .with_query(name)
             .add_field("p50", latency.quantile(0.5))
             .add_field("p75", latency.quantile(0.75))
             .add_field("p90", latency.quantile(0.90))
