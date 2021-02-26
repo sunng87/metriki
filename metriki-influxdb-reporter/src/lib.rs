@@ -6,6 +6,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use derive_builder::Builder;
 use futures::executor;
 use influxdb::{Client, InfluxDbWriteable, Timestamp, WriteQuery};
+use log::warn;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 
@@ -84,15 +85,20 @@ impl InfluxDbReporter {
         query
     }
 
+    #[inline]
+    fn do_query(&self, client: &Client, query: WriteQuery) {
+        if let Err(e) = executor::block_on(client.query(&query)) {
+            warn!("Failed to write influxdb, {}", e)
+        }
+    }
+
     fn report_meter(&self, client: &Client, name: &str, meter: &Meter) {
         let q = self
             .with_query(name)
             .add_field("m1", meter.m1_rate())
             .add_field("m5", meter.m5_rate())
             .add_field("m15", meter.m15_rate());
-
-        //TODO: query response
-        let _ = executor::block_on(client.query(&q));
+        self.do_query(client, q);
     }
 
     fn report_gauge(&self, client: &Client, name: &str, gauge: &Gauge) {
@@ -114,13 +120,13 @@ impl InfluxDbReporter {
             .add_field("max", snapshot.max())
             .add_field("mean", snapshot.mean());
 
-        let _ = executor::block_on(client.query(&q));
+        self.do_query(client, q);
     }
 
     fn report_counter(&self, client: &Client, name: &str, c: &Counter) {
         let q = self.with_query(name).add_field("value", c.value());
 
-        let _ = executor::block_on(client.query(&q));
+        self.do_query(client, q);
     }
 
     fn report_timer(&self, client: &Client, name: &str, t: &Timer) {
@@ -141,6 +147,6 @@ impl InfluxDbReporter {
             .add_field("m5", rate.m5_rate())
             .add_field("m15", rate.m15_rate());
 
-        let _ = executor::block_on(client.query(&q));
+        self.do_query(client, q);
     }
 }
