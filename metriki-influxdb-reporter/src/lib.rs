@@ -19,13 +19,13 @@ pub struct InfluxDbReporter {
     interval_secs: u64,
     #[builder(setter(into))]
     database: String,
-    #[builder(setter(into))]
+    #[builder(default, setter(into))]
     username: Option<String>,
-    #[builder(setter(into))]
+    #[builder(default, setter(into))]
     password: Option<String>,
     #[builder(default, setter(into))]
     measurement_prefix: String,
-    #[builder(setter)]
+    #[builder(default, setter)]
     tags: HashMap<String, String>,
 }
 
