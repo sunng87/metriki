@@ -19,9 +19,9 @@ pub struct InfluxDbReporter {
     interval_secs: u64,
     #[builder(setter(into))]
     database: String,
-    #[builder(default, setter(into))]
+    #[builder(default, setter(into, strip_option))]
     username: Option<String>,
-    #[builder(default, setter(into))]
+    #[builder(default, setter(into, strip_option))]
     password: Option<String>,
     #[builder(default, setter(into))]
     measurement_prefix: String,
@@ -52,14 +52,19 @@ impl InfluxDbReporter {
             let metrics = self.registry.snapshots();
             let client = self.new_client();
 
-            for (ref key, metric) in metrics {
-                match metric {
-                    Metric::Counter(c) => self.report_counter(&client, key, c.as_ref()),
-                    Metric::Gauge(g) => self.report_gauge(&client, key, g.as_ref()),
-                    Metric::Timer(t) => self.report_timer(&client, key, t.as_ref()),
-                    Metric::Meter(m) => self.report_meter(&client, key, m.as_ref()),
-                    Metric::Histogram(h) => self.report_histogram(&client, key, &h.snapshot()),
-                }
+            let queries: Vec<WriteQuery> = metrics
+                .iter()
+                .map(|(ref key, metric)| match metric {
+                    Metric::Counter(c) => self.report_counter(key, c.as_ref()),
+                    Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
+                    Metric::Timer(t) => self.report_timer(key, t.as_ref()),
+                    Metric::Meter(m) => self.report_meter(key, m.as_ref()),
+                    Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()),
+                })
+                .collect();
+
+            if !queries.is_empty() {
+                self.do_query(&client, queries);
             }
 
             thread::sleep(Duration::from_secs(self.interval_secs));
@@ -86,31 +91,26 @@ impl InfluxDbReporter {
     }
 
     #[inline]
-    fn do_query(&self, client: &Client, query: WriteQuery) {
+    fn do_query(&self, client: &Client, query: Vec<WriteQuery>) {
         if let Err(e) = executor::block_on(client.query(&query)) {
             warn!("Failed to write influxdb, {}", e)
         }
     }
 
-    fn report_meter(&self, client: &Client, name: &str, meter: &Meter) {
-        let q = self
-            .with_query(name)
+    fn report_meter(&self, name: &str, meter: &Meter) -> WriteQuery {
+        self.with_query(name)
             .add_field("m1", meter.m1_rate())
             .add_field("m5", meter.m5_rate())
-            .add_field("m15", meter.m15_rate());
-        self.do_query(client, q);
+            .add_field("m15", meter.m15_rate())
     }
 
-    fn report_gauge(&self, client: &Client, name: &str, gauge: &Gauge) {
+    fn report_gauge(&self, name: &str, gauge: &Gauge) -> WriteQuery {
         let value = gauge.value();
-        let q = self.with_query(name).add_field("value", value);
-
-        let _ = executor::block_on(client.query(&q));
+        self.with_query(name).add_field("value", value)
     }
 
-    fn report_histogram(&self, client: &Client, name: &str, snapshot: &HistogramSnapshot) {
-        let q = self
-            .with_query(name)
+    fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot) -> WriteQuery {
+        self.with_query(name)
             .add_field("p50", snapshot.quantile(0.5))
             .add_field("p75", snapshot.quantile(0.75))
             .add_field("p90", snapshot.quantile(0.90))
@@ -118,23 +118,18 @@ impl InfluxDbReporter {
             .add_field("p999", snapshot.quantile(0.999))
             .add_field("min", snapshot.min())
             .add_field("max", snapshot.max())
-            .add_field("mean", snapshot.mean());
-
-        self.do_query(client, q);
+            .add_field("mean", snapshot.mean())
     }
 
-    fn report_counter(&self, client: &Client, name: &str, c: &Counter) {
-        let q = self.with_query(name).add_field("value", c.value());
-
-        self.do_query(client, q);
+    fn report_counter(&self, name: &str, c: &Counter) -> WriteQuery {
+        self.with_query(name).add_field("value", c.value())
     }
 
-    fn report_timer(&self, client: &Client, name: &str, t: &Timer) {
+    fn report_timer(&self, name: &str, t: &Timer) -> WriteQuery {
         let rate = t.rate();
         let latency = t.latency();
 
-        let q = self
-            .with_query(name)
+        self.with_query(name)
             .add_field("p50", latency.quantile(0.5))
             .add_field("p75", latency.quantile(0.75))
             .add_field("p90", latency.quantile(0.90))
@@ -145,8 +140,6 @@ impl InfluxDbReporter {
             .add_field("mean", latency.mean())
             .add_field("m1", rate.m1_rate())
             .add_field("m5", rate.m5_rate())
-            .add_field("m15", rate.m15_rate());
-
-        self.do_query(client, q);
+            .add_field("m15", rate.m15_rate())
     }
 }
