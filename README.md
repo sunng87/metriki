@@ -14,8 +14,9 @@ This library is a work in progress.
   - [x] counter
 - Reporters
   - [x] logger
-  - [ ] influxdb
+  - [x] influxdb
   - [ ] riemann
+  - [ ] prometheus
 - Instruments
   - [x] warp
   - [ ] reqwest
