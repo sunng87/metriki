@@ -1,9 +1,8 @@
 use std::sync::Arc;
-use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use derive_builder::Builder;
-use futures::executor;
+
 use hostname;
 use lazy_static::lazy_static;
 use log::warn;
@@ -11,6 +10,7 @@ use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 use rustmann::protos::riemann::Event;
 use rustmann::{EventBuilder, RiemannClient, RiemannClientOptionsBuilder};
+use tokio::time;
 
 lazy_static! {
     static ref THE_HOSTNAME: Option<String> = hostname::get()
@@ -50,37 +50,34 @@ impl RiemannReporter {
     }
 
     pub fn start(self) {
-        let looper = move || loop {
-            let metrics = self.registry.snapshots();
-            let client = self.new_client();
+        tokio::spawn(async move {
+            loop {
+                let metrics = self.registry.snapshots();
+                let client = Arc::new(self.new_client());
 
-            let events: Vec<Event> = metrics
-                .iter()
-                .map(|(ref key, metric)| match metric {
-                    Metric::Counter(c) => self.report_counter(key, c.as_ref()).into_iter(),
-                    Metric::Gauge(g) => self.report_gauge(key, g.as_ref()).into_iter(),
-                    Metric::Timer(t) => self.report_timer(key, t.as_ref()).into_iter(),
-                    Metric::Meter(m) => self.report_meter(key, m.as_ref()).into_iter(),
-                    Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()).into_iter(),
-                })
-                .flatten()
-                .collect();
+                let events: Vec<Event> = metrics
+                    .iter()
+                    .map(|(ref key, metric)| match metric {
+                        Metric::Counter(c) => self.report_counter(key, c.as_ref()).into_iter(),
+                        Metric::Gauge(g) => self.report_gauge(key, g.as_ref()).into_iter(),
+                        Metric::Timer(t) => self.report_timer(key, t.as_ref()).into_iter(),
+                        Metric::Meter(m) => self.report_meter(key, m.as_ref()).into_iter(),
+                        Metric::Histogram(h) => {
+                            self.report_histogram(key, &h.snapshot()).into_iter()
+                        }
+                    })
+                    .flatten()
+                    .collect();
 
-            if !events.is_empty() {
-                self.send(&client, events);
+                if !events.is_empty() {
+                    if let Err(e) = client.send_events(events).await {
+                        warn!("Failed to write influxdb, {}", e);
+                    }
+                }
+
+                time::sleep(Duration::from_secs(self.interval_secs)).await;
             }
-
-            thread::sleep(Duration::from_secs(self.interval_secs));
-        };
-
-        thread::spawn(looper);
-    }
-
-    #[inline]
-    fn send(&self, client: &RiemannClient, events: Vec<Event>) {
-        if let Err(e) = executor::block_on(client.send_events(events)) {
-            warn!("Failed to write influxdb, {}", e)
-        }
+        });
     }
 
     fn event(&self) -> EventBuilder {
