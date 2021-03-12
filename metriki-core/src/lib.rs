@@ -32,7 +32,6 @@
 //! ## Usage
 //!
 //! Create a `MetricsRegistry` for your application as the entrypoint and holder of all metrics.
-//! By default, the `new` function returns a `MetricsRegistry` that wrapped in an `Arc`.
 //!
 //! ```
 //! use metriki_core::MetricsRegistry;
