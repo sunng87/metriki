@@ -13,7 +13,7 @@ documentation = "https://docs.rs/metriki-influxdb-reporter/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-metriki-core = { path = "../metriki-core", version = "0.1.2-alpha.0"}
+metriki-core = { path = "../metriki-core"}
 influxdb = { version = "0.4", features = ["curl-client"], default-features = false }
 derive_builder = "0.9.0"
 futures = { version = "0.3", features = ["executor"]}
