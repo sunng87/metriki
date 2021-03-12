@@ -15,7 +15,7 @@ This library is a work in progress.
 - Reporters
   - [x] logger
   - [x] influxdb
-  - [ ] riemann
+  - [x] riemann
   - [ ] prometheus
 - Instruments
   - [x] warp
