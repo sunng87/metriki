@@ -6,19 +6,19 @@ This library is a work in progress.
 
 ## Features and TODOs
 
-- Metrics
+- Metrics [(doc)](https://docs.rs/metriki-core/)
   - [x] meter
   - [x] histogram
   - [x] timer
   - [x] gauge
   - [x] counter
 - Reporters
-  - [x] logger
-  - [x] influxdb
-  - [x] riemann
+  - [x] logger [(doc)](https://docs.rs/metriki-log-reporter/)
+  - [x] influxdb [(doc)](https://docs.rs/metriki-influxdb-reporter/)
+  - [x] riemann [(doc)](https://docs.rs/metriki-riemann-reporter/)
   - [ ] prometheus
 - Instruments
-  - [x] warp
+  - [x] warp [(doc)](https://docs.rs/metriki-warp/)
   - [ ] reqwest
 
 ## Docs
