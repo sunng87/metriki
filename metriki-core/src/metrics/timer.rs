@@ -2,6 +2,9 @@ use std::time::Instant;
 
 use super::{Histogram, HistogramSnapshot, Meter};
 
+/// Timers are combination of `Histogram` and `Meter`.
+///
+/// Timers are handy for tracking rate and latency of a special part of code.
 #[derive(Debug)]
 pub struct Timer {
     rate: Meter,

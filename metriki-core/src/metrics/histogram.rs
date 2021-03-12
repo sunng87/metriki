@@ -2,6 +2,10 @@ use std::sync::{Arc, Mutex};
 
 use exponential_decay_histogram::{ExponentialDecayHistogram, Snapshot};
 
+/// Histograms are used to record the distribution of data over time.
+///
+/// By default, `Histogram` uses exponential decay algorithm to avoid
+/// record too much data in memory.
 #[derive(Debug)]
 pub struct Histogram {
     inner: Arc<Mutex<ExponentialDecayHistogram>>,

@@ -1,5 +1,6 @@
 use std::sync::atomic::{AtomicI64, Ordering};
 
+/// Counters are integer values you can increment and decrement.
 #[derive(Debug)]
 pub struct Counter {
     value: AtomicI64,

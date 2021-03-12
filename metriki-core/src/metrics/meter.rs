@@ -4,6 +4,7 @@ use crossbeam_utils::atomic::AtomicCell;
 
 use crate::utils;
 
+/// Meters are used to calculate rate of an event.
 #[derive(Debug)]
 pub struct Meter {
     moving_avarages: ExponentiallyWeightedMovingAverages,

@@ -2,6 +2,7 @@ use std::fmt;
 
 pub type GaugeFn = Box<dyn Fn() -> f64 + Send + Sync>;
 
+/// Gauges are used to measure the instantaneous value of something.
 pub struct Gauge {
     func: GaugeFn,
 }
