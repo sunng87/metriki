@@ -10,7 +10,7 @@ Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dr
   - [x] timer
   - [x] gauge
   - [x] counter
-- Reporters
+- Reporters / Exporters
   - [x] logger [(doc)](https://docs.rs/metriki-log-reporter/) [(crate)](https://crates.io/crates/metriki-log-reporter)
   - [x] influxdb [(doc)](https://docs.rs/metriki-influxdb-reporter/) [(crate)](https://crates.io/crates/metriki-influxdb-reporter)
   - [x] riemann [(doc)](https://docs.rs/metriki-riemann-reporter/) [(crate)](https://crates.io/crates/metriki-riemann-reporter)
