@@ -1,18 +1,21 @@
 use std::sync::Arc;
+use std::thread;
 
 use derive_builder::Builder;
+use log::warn;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 use prometheus::proto::{
-    Counter as PromethuesCount, Gauge as PromethuesGauge, Metric, MetricFamily, MetricType,
-    Quantile, Summary,
+    Counter as PromethuesCount, Gauge as PromethuesGauge, Metric as PrometheusMetric, MetricFamily,
+    MetricType, Quantile, Summary,
 };
 use prometheus::{Encoder, TextEncoder};
+use tiny_http::{Response, Server};
 
 #[derive(Builder)]
-pub struct PromethuesExporter {
+pub struct PrometheusExporter {
     registry: Arc<MetricsRegistry>,
-    #[builder(setter(into))]
+    #[builder(setter(into), default = "\"0.0.0.0\".to_string()")]
     host: String,
     #[builder(setter)]
     port: u16,
@@ -20,21 +23,21 @@ pub struct PromethuesExporter {
     prefix: String,
 }
 
-fn new_counter(v: f64) -> Metric {
+fn new_counter(v: f64) -> PrometheusMetric {
     let mut counter = PromethuesCount::new();
     counter.set_value(v);
 
-    let mut metric = Metric::new();
+    let mut metric = PrometheusMetric::new();
     metric.set_counter(counter);
 
     metric
 }
 
-fn new_gauge(v: f64) -> Metric {
+fn new_gauge(v: f64) -> PrometheusMetric {
     let mut gauge = PromethuesGauge::new();
     gauge.set_value(v);
 
-    let mut metric = Metric::new();
+    let mut metric = PrometheusMetric::new();
     metric.set_gauge(gauge);
 
     metric
@@ -49,8 +52,37 @@ fn new_quantile(f: f64, s: &HistogramSnapshot) -> Quantile {
     q
 }
 
-impl PromethuesExporter {
-    pub fn start(self) {}
+impl PrometheusExporter {
+    pub fn start(self) {
+        let addr = format!("{}:{}", self.host, self.port);
+        let server = Server::http(addr).expect("Failed to start promethues exporter server.");
+        let encoder = TextEncoder::new();
+
+        let looper = move || loop {
+            if let Ok(req) = server.recv() {
+                let metrics = self.registry.snapshots();
+                let metric_families: Vec<MetricFamily> = metrics
+                    .iter()
+                    .map(|(ref key, metric)| match metric {
+                        Metric::Counter(c) => self.report_counter(key, c.as_ref()),
+                        Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
+                        Metric::Timer(t) => self.report_timer(key, t.as_ref()),
+                        Metric::Meter(m) => self.report_meter(key, m.as_ref()),
+                        Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()),
+                    })
+                    .collect();
+
+                let mut buffer = Vec::new();
+                encoder.encode(&metric_families, &mut buffer).unwrap();
+
+                if let Err(e) = req.respond(Response::from_data(buffer)) {
+                    warn!("Error on response {}", e);
+                }
+            }
+        };
+
+        thread::spawn(looper);
+    }
 
     fn new_metric_family(&self, name: &str, mtype: MetricType) -> MetricFamily {
         let mut family = MetricFamily::new();
@@ -80,7 +112,7 @@ impl PromethuesExporter {
     fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot) -> MetricFamily {
         let mut family = self.new_metric_family(name, MetricType::SUMMARY);
 
-        let mut metric = Metric::new();
+        let mut metric = PrometheusMetric::new();
         let quantiles = vec![
             new_quantile(0.5, snapshot),
             new_quantile(0.75, snapshot),
@@ -109,7 +141,7 @@ impl PromethuesExporter {
         let latency = t.latency();
 
         let mut family = self.new_metric_family(name, MetricType::SUMMARY);
-        let mut metric = Metric::new();
+        let mut metric = PrometheusMetric::new();
         let quantiles = vec![
             new_quantile(0.5, &latency),
             new_quantile(0.75, &latency),

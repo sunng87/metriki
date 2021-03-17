@@ -17,3 +17,4 @@ prometheus = "0.12"
 metriki-core = { path = "../metriki-core"}
 derive_builder = "0.9.0"
 log = "0.4"
+tiny_http = "0.8"
