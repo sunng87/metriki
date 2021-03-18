@@ -5,11 +5,6 @@ Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dr
 ## Features and TODOs
 
 - Metrics [(doc)](https://docs.rs/metriki-core/) [(crate)](https://crates.io/crates/metriki-core)
-  - [x] meter
-  - [x] histogram
-  - [x] timer
-  - [x] gauge
-  - [x] counter
 - Reporters / Exporters
   - [x] logger [(doc)](https://docs.rs/metriki-log-reporter/) [(crate)](https://crates.io/crates/metriki-log-reporter)
   - [x] influxdb [(doc)](https://docs.rs/metriki-influxdb-reporter/) [(crate)](https://crates.io/crates/metriki-influxdb-reporter)
@@ -18,6 +13,24 @@ Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dr
 - Instruments
   - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp)
   - [ ] ?reqwest
+
+## Concepts
+
+### Metrics
+
+- **Counter**: a value that can be increased and decreased.
+- **Meter**: measures rate of an event.
+- **Histogram**: records distribution of data over time.
+- **Timer**: a combination of meter and histogram.
+- **Gauge**: a function that provides value when queried.
+
+### Reporter
+
+A component to report metric data periodically. Typically used for data sinks which has a push-model.
+
+### Exporter
+
+A component to expose metric data to external queriers. Typically for pull based data sinks.
 
 ## License
 
