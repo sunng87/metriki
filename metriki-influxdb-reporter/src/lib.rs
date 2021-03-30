@@ -19,9 +19,9 @@ pub struct InfluxDbReporter {
     interval_secs: u64,
     #[builder(setter(into))]
     database: String,
-    #[builder(default, setter(into, strip_option))]
+    #[builder(default, setter(into))]
     username: Option<String>,
-    #[builder(default, setter(into, strip_option))]
+    #[builder(default, setter(into))]
     password: Option<String>,
     #[builder(default, setter(into))]
     measurement_prefix: String,
