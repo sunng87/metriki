@@ -60,8 +60,10 @@
 //! ```
 //!
 
+mod filter;
 pub mod metrics;
 mod registry;
 mod utils;
 
+pub use filter::MetricsFilter;
 pub use registry::MetricsRegistry;

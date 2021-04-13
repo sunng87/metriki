@@ -1,13 +1,24 @@
 use std::collections::HashMap;
+use std::fmt::{self, Debug, Formatter};
 use std::sync::{Arc, RwLock};
 
+use crate::filter::MetricsFilter;
 use crate::metrics::*;
 
 /// Entrypoint of all metrics
 ///
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct MetricsRegistry {
     inner: Arc<RwLock<Inner>>,
+    filter: Option<Box<dyn MetricsFilter>>,
+}
+
+impl Debug for MetricsRegistry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        f.debug_struct("MetricsRegistry")
+            .field("inner", &self.inner)
+            .finish()
+    }
 }
 
 #[derive(Default, Debug)]
@@ -152,6 +163,16 @@ impl MetricsRegistry {
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
         let inner = self.inner.read().unwrap();
-        inner.metrics.clone()
+        if let Some(ref filter) = self.filter {
+            let mut results = HashMap::new();
+            for (k, v) in inner.metrics.iter() {
+                if filter.accept(k) {
+                    results.insert(k.to_owned(), v.clone());
+                }
+            }
+            results
+        } else {
+            inner.metrics.clone()
+        }
     }
 }
