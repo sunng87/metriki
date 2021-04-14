@@ -175,4 +175,36 @@ impl MetricsRegistry {
             inner.metrics.clone()
         }
     }
+
+    pub fn set_filter(&mut self, filter: Box<dyn MetricsFilter>) {
+        self.filter = Some(filter);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::filter::MetricsFilter;
+    use crate::registry::MetricsRegistry;
+
+    #[test]
+    fn test_metrics_filter() {
+        let mut registry = MetricsRegistry::new();
+
+        registry.meter("l1.tomcat.request").mark();
+        registry.meter("l1.jetty.request").mark();
+        registry.meter("l2.tomcat.request").mark();
+        registry.meter("l2.jetty.request").mark();
+
+        struct NameFilter;
+        impl MetricsFilter for NameFilter {
+            fn accept(&self, name: &str) -> bool {
+                name.starts_with("l1")
+            }
+        }
+
+        registry.set_filter(Box::new(NameFilter));
+
+        let snapshot = registry.snapshots();
+        assert_eq!(2, snapshot.len());
+    }
 }
