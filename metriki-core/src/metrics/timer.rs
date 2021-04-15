@@ -60,3 +60,27 @@ impl<'a> Drop for TimerContext<'a> {
         self.stop()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::time::Duration;
+
+    use super::Timer;
+
+    #[test]
+    fn test_drop_timer_context() {
+        let timer = Timer::new();
+        // traced block
+        let t = timer.start();
+        t.stop();
+
+        assert!(timer.rate().count() == 1);
+
+        {
+            timer.start();
+            std::thread::sleep(Duration::from_millis(500));
+        }
+
+        assert!(timer.rate().count() == 2);
+    }
+}
