@@ -2,6 +2,11 @@ use std::collections::HashMap;
 use std::fmt::{self, Debug, Formatter};
 use std::sync::{Arc, RwLock};
 
+#[cfg(feature = "ser")]
+use serde::ser::SerializeMap;
+#[cfg(feature = "ser")]
+use serde::{Serialize, Serializer};
+
 use crate::filter::MetricsFilter;
 use crate::metrics::*;
 
@@ -211,5 +216,22 @@ mod test {
 
         let snapshot = registry.snapshots();
         assert_eq!(2, snapshot.len());
+    }
+}
+
+#[cfg(feature = "ser")]
+impl Serialize for MetricsRegistry {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let snapshot = self.snapshots();
+        let mut map = serializer.serialize_map(Some(snapshot.len()))?;
+
+        for (k, v) in snapshot.iter() {
+            map.serialize_entry(k, v)?;
+        }
+
+        map.end()
     }
 }

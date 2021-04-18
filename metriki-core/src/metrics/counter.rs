@@ -1,5 +1,10 @@
 use std::sync::atomic::{AtomicI64, Ordering};
 
+#[cfg(feature = "ser")]
+use serde::ser::SerializeMap;
+#[cfg(feature = "ser")]
+use serde::{Serialize, Serializer};
+
 /// Counters are integer values you can increment and decrement.
 #[derive(Debug)]
 pub struct Counter {
@@ -23,5 +28,17 @@ impl Counter {
 
     pub fn value(&self) -> i64 {
         self.value.load(Ordering::Relaxed)
+    }
+}
+
+#[cfg(feature = "ser")]
+impl Serialize for Counter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry("value", &self.value())?;
+        map.end()
     }
 }
