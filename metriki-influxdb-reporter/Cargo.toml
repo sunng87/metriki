@@ -1,6 +1,6 @@
 [package]
 name = "metriki-influxdb-reporter"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Influxdb reporter for metriki"
