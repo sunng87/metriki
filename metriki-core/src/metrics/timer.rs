@@ -26,9 +26,13 @@ impl Timer {
     }
 
     pub fn start(&self) -> TimerContext {
+        self.start_at(Instant::now())
+    }
+
+    pub fn start_at(&self, start_at: Instant) -> TimerContext {
         self.rate.mark();
         TimerContext {
-            start_at: Instant::now(),
+            start_at,
             timer: self,
         }
     }
@@ -43,10 +47,40 @@ impl Timer {
 }
 
 impl<'a> TimerContext<'a> {
-    pub fn stop(self) {
+    pub fn stop(&self) {
         let elapsed = Instant::now() - self.start_at;
         let elapsed_ms = elapsed.as_millis();
 
         self.timer.latency.update(elapsed_ms as i64);
+    }
+}
+
+impl<'a> Drop for TimerContext<'a> {
+    fn drop(&mut self) {
+        self.stop()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::time::Duration;
+
+    use super::Timer;
+
+    #[test]
+    fn test_drop_timer_context() {
+        let timer = Timer::new();
+        // traced block
+        let t = timer.start();
+        t.stop();
+
+        assert!(timer.rate().count() == 1);
+
+        {
+            timer.start();
+            std::thread::sleep(Duration::from_millis(500));
+        }
+
+        assert!(timer.rate().count() == 2);
     }
 }
