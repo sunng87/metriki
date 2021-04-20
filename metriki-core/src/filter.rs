@@ -1,3 +1,5 @@
-pub trait MetricsFilter {
-    fn accept(&self, name: &str) -> bool;
+use crate::metrics::Metric;
+
+pub trait MetricsFilter: Send + Sync {
+    fn accept(&self, name: &str, metric: &Metric) -> bool;
 }

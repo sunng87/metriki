@@ -10,7 +10,7 @@ use crate::metrics::*;
 #[derive(Default)]
 pub struct MetricsRegistry {
     inner: Arc<RwLock<Inner>>,
-    filter: Option<Box<dyn MetricsFilter>>,
+    filter: Option<Box<dyn MetricsFilter + 'static>>,
 }
 
 impl Debug for MetricsRegistry {
@@ -166,7 +166,7 @@ impl MetricsRegistry {
         if let Some(ref filter) = self.filter {
             let mut results = HashMap::new();
             for (k, v) in inner.metrics.iter() {
-                if filter.accept(k) {
+                if filter.accept(k, v) {
                     results.insert(k.to_owned(), v.clone());
                 }
             }
@@ -176,7 +176,7 @@ impl MetricsRegistry {
         }
     }
 
-    pub fn set_filter(&mut self, filter: Box<dyn MetricsFilter>) {
+    pub fn set_filter(&mut self, filter: Box<dyn MetricsFilter + 'static>) {
         self.filter = Some(filter);
     }
 }
@@ -184,6 +184,7 @@ impl MetricsRegistry {
 #[cfg(test)]
 mod test {
     use crate::filter::MetricsFilter;
+    use crate::metrics::Metric;
     use crate::registry::MetricsRegistry;
 
     #[test]
@@ -197,7 +198,7 @@ mod test {
 
         struct NameFilter;
         impl MetricsFilter for NameFilter {
-            fn accept(&self, name: &str) -> bool {
+            fn accept(&self, name: &str, _: &Metric) -> bool {
                 name.starts_with("l1")
             }
         }
