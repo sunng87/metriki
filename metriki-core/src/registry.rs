@@ -159,6 +159,7 @@ impl MetricsRegistry {
     }
 
     /// Returns all the metrics hold in the registry.
+    /// Metrics is filtered if a filter is set for this registry.
     ///
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
@@ -176,8 +177,11 @@ impl MetricsRegistry {
         }
     }
 
-    pub fn set_filter(&mut self, filter: Box<dyn MetricsFilter + 'static>) {
-        self.filter = Some(filter);
+    /// Set a filter for this registry.
+    /// The filter will apply to `snapshots` function.
+    ///
+    pub fn set_filter(&mut self, filter: Option<Box<dyn MetricsFilter + 'static>>) {
+        self.filter = filter;
     }
 }
 
@@ -203,7 +207,7 @@ mod test {
             }
         }
 
-        registry.set_filter(Box::new(NameFilter));
+        registry.set_filter(Some(Box::new(NameFilter)));
 
         let snapshot = registry.snapshots();
         assert_eq!(2, snapshot.len());
