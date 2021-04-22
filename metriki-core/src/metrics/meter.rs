@@ -1,5 +1,5 @@
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 
 use crossbeam_utils::atomic::AtomicCell;
 
@@ -10,6 +10,7 @@ use crate::utils;
 pub struct Meter {
     moving_avarages: ExponentiallyWeightedMovingAverages,
     count: AtomicU64,
+    start_time: SystemTime,
 }
 
 impl Meter {
@@ -17,6 +18,7 @@ impl Meter {
         Meter {
             moving_avarages: ExponentiallyWeightedMovingAverages::new(),
             count: AtomicU64::from(0),
+            start_time: SystemTime::now(),
         }
     }
 
@@ -47,6 +49,22 @@ impl Meter {
 
     pub fn count(&self) -> u64 {
         self.count.load(Ordering::Relaxed)
+    }
+
+    pub fn mean_rate(&self) -> f64 {
+        let count = self.count();
+        if count > 0 {
+            if let Ok(elapsed) = SystemTime::now()
+                .duration_since(self.start_time)
+                .map(|d| d.as_secs() as f64)
+            {
+                count as f64 / elapsed
+            } else {
+                0f64
+            }
+        } else {
+            0f64
+        }
     }
 }
 
