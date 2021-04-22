@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use exponential_decay_histogram::{ExponentialDecayHistogram, Snapshot};
@@ -9,10 +10,12 @@ use exponential_decay_histogram::{ExponentialDecayHistogram, Snapshot};
 #[derive(Debug)]
 pub struct Histogram {
     inner: Arc<Mutex<ExponentialDecayHistogram>>,
+    count: AtomicU64,
 }
 
 pub struct HistogramSnapshot {
     inner: Snapshot,
+    count: u64,
 }
 
 impl Histogram {
@@ -21,23 +24,33 @@ impl Histogram {
 
         Histogram {
             inner: Arc::new(Mutex::new(inner)),
+            count: AtomicU64::new(0),
         }
     }
 
     pub fn update(&self, value: i64) {
         let mut inner = self.inner.lock().unwrap();
         inner.update(value as i64);
+        self.count.fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn snapshot(&self) -> HistogramSnapshot {
         let inner = self.inner.lock().unwrap();
         let snapshot = inner.snapshot();
+        let count = self.count.load(Ordering::Relaxed);
 
-        HistogramSnapshot { inner: snapshot }
+        HistogramSnapshot {
+            inner: snapshot,
+            count,
+        }
     }
 }
 
 impl HistogramSnapshot {
+    pub fn count(&self) -> u64 {
+        self.count
+    }
+
     pub fn mean(&self) -> f64 {
         self.inner.mean()
     }
