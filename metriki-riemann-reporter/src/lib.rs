@@ -3,7 +3,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use derive_builder::Builder;
 
-use hostname;
 use lazy_static::lazy_static;
 use log::warn;
 use metriki_core::metrics::*;
@@ -45,8 +44,7 @@ impl RiemannReporter {
             .port(self.port)
             .build();
 
-        let client = RiemannClient::new(&riemann_options);
-        client
+        RiemannClient::new(&riemann_options)
     }
 
     pub fn start(self) {
