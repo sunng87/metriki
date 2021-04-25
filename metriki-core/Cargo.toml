@@ -16,3 +16,6 @@ readme = "../README.md"
 [dependencies]
 crossbeam-utils = "0.8"
 exponential-decay-histogram = "0.1.9"
+
+[dev-dependencies]
+rand = "0.8"
