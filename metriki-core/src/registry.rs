@@ -1,13 +1,24 @@
 use std::collections::HashMap;
+use std::fmt::{self, Debug, Formatter};
 use std::sync::{Arc, RwLock};
 
+use crate::filter::MetricsFilter;
 use crate::metrics::*;
 
 /// Entrypoint of all metrics
 ///
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct MetricsRegistry {
     inner: Arc<RwLock<Inner>>,
+    filter: Option<Box<dyn MetricsFilter + 'static>>,
+}
+
+impl Debug for MetricsRegistry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+        f.debug_struct("MetricsRegistry")
+            .field("inner", &self.inner)
+            .finish()
+    }
 }
 
 #[derive(Default, Debug)]
@@ -148,10 +159,57 @@ impl MetricsRegistry {
     }
 
     /// Returns all the metrics hold in the registry.
+    /// Metrics is filtered if a filter is set for this registry.
     ///
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
         let inner = self.inner.read().unwrap();
-        inner.metrics.clone()
+        if let Some(ref filter) = self.filter {
+            let mut results = HashMap::new();
+            for (k, v) in inner.metrics.iter() {
+                if filter.accept(k, v) {
+                    results.insert(k.to_owned(), v.clone());
+                }
+            }
+            results
+        } else {
+            inner.metrics.clone()
+        }
+    }
+
+    /// Set a filter for this registry.
+    /// The filter will apply to `snapshots` function.
+    ///
+    pub fn set_filter(&mut self, filter: Option<Box<dyn MetricsFilter + 'static>>) {
+        self.filter = filter;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::filter::MetricsFilter;
+    use crate::metrics::Metric;
+    use crate::registry::MetricsRegistry;
+
+    #[test]
+    fn test_metrics_filter() {
+        let mut registry = MetricsRegistry::new();
+
+        registry.meter("l1.tomcat.request").mark();
+        registry.meter("l1.jetty.request").mark();
+        registry.meter("l2.tomcat.request").mark();
+        registry.meter("l2.jetty.request").mark();
+
+        struct NameFilter;
+        impl MetricsFilter for NameFilter {
+            fn accept(&self, name: &str, _: &Metric) -> bool {
+                name.starts_with("l1")
+            }
+        }
+
+        registry.set_filter(Some(Box::new(NameFilter)));
+
+        let snapshot = registry.snapshots();
+        assert_eq!(2, snapshot.len());
     }
 }
