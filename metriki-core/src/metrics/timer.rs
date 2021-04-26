@@ -1,5 +1,10 @@
 use std::time::Instant;
 
+#[cfg(feature = "ser")]
+use serde::ser::SerializeMap;
+#[cfg(feature = "ser")]
+use serde::{Serialize, Serializer};
+
 use super::{Histogram, HistogramSnapshot, Meter};
 
 /// Timers are combination of `Histogram` and `Meter`.
@@ -58,6 +63,37 @@ impl<'a> TimerContext<'a> {
 impl<'a> Drop for TimerContext<'a> {
     fn drop(&mut self) {
         self.stop()
+    }
+}
+
+#[cfg(feature = "ser")]
+impl Serialize for Timer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(13))?;
+
+        let rate = self.rate();
+        let latency = self.latency();
+
+        map.serialize_entry("count", &rate.count())?;
+        map.serialize_entry("m1_rate", &rate.m1_rate())?;
+        map.serialize_entry("m5_rate", &rate.m5_rate())?;
+        map.serialize_entry("m15_rate", &rate.m15_rate())?;
+
+        map.serialize_entry("mean", &latency.mean())?;
+        map.serialize_entry("max", &latency.max())?;
+        map.serialize_entry("min", &latency.min())?;
+        map.serialize_entry("stddev", &latency.stddev())?;
+
+        map.serialize_entry("p50", &latency.quantile(0.5))?;
+        map.serialize_entry("p75", &latency.quantile(0.75))?;
+        map.serialize_entry("p90", &latency.quantile(0.9))?;
+        map.serialize_entry("p99", &latency.quantile(0.99))?;
+        map.serialize_entry("p999", &latency.quantile(0.999))?;
+
+        map.end()
     }
 }
 

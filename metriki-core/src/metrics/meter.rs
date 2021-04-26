@@ -3,6 +3,11 @@ use std::time::{Duration, Instant, SystemTime};
 
 use crossbeam_utils::atomic::AtomicCell;
 
+#[cfg(feature = "ser")]
+use serde::ser::SerializeMap;
+#[cfg(feature = "ser")]
+use serde::{Serialize, Serializer};
+
 use crate::utils;
 
 /// Meters are used to calculate rate of an event.
@@ -192,5 +197,22 @@ impl ExponentiallyWeightedMovingAverages {
 
     fn m15_rate(&self) -> f64 {
         self.m15.get_rate()
+    }
+}
+
+#[cfg(feature = "ser")]
+impl Serialize for Meter {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(4))?;
+
+        map.serialize_entry("count", &self.count())?;
+        map.serialize_entry("m1_rate", &self.m1_rate())?;
+        map.serialize_entry("m5_rate", &self.m5_rate())?;
+        map.serialize_entry("m15_rate", &self.m15_rate())?;
+
+        map.end()
     }
 }

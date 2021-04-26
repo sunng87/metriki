@@ -16,6 +16,11 @@ readme = "../README.md"
 [dependencies]
 crossbeam-utils = "0.8"
 exponential-decay-histogram = "0.1.9"
+serde = { version = "1", optional = true }
+
+[features]
+default = []
+ser = ["serde"]
 
 [dev-dependencies]
 rand = "0.8"
