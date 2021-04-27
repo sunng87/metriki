@@ -3,8 +3,8 @@
 Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dropwizard/metrics).
 
 Like Dropwizard Metrics, Metriki aggregates metrics on client-side and outputs limit amount data.
-For now, it uses exponential decay algorithms to keep the memory footprint at a low level, while
-retaining the statistical features.
+For now, it uses exponential decay and moving average algorithms to keep the memory footprint at
+a low level, while retaining the statistical information.
 
 ## Features and TODOs
 
