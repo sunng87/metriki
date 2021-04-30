@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::net::UdpSocket;
 use std::sync::Arc;
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use cadence::prelude::*;
 use cadence::{Metric as StatsdMetric, MetricBuilder, MetricError, StatsdClient, UdpMetricSink};
@@ -26,20 +26,13 @@ pub struct StatsdReporter {
     tags: HashMap<String, String>,
 }
 
-fn system_time_millis() -> u128 {
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH);
-    timestamp
-        .expect("System time earlier than UNIX_EPOCH")
-        .as_millis()
-}
-
 fn statsd_client_error_handler(err: MetricError) {
     warn!("Metriki statsd reporter error: {}", err);
 }
 
 impl StatsdReporter {
     fn new_client(&self) -> StatsdClient {
-        let host = (self.host, self.port);
+        let host = (self.host.clone(), self.port);
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
         let sink = UdpMetricSink::from(host, socket).unwrap();
         StatsdClient::builder(&self.prefix, sink)
@@ -68,12 +61,12 @@ impl StatsdReporter {
         thread::spawn(looper);
     }
 
-    fn send<T>(&self, mb: MetricBuilder<'_, '_, T>)
+    fn send<'a, T>(&'a self, mut mb: MetricBuilder<'a, '_, T>)
     where
         T: StatsdMetric + From<String>,
     {
-        for (k, v) in self.tags {
-            mb = mb.with_tag(&k, &v);
+        for (k, v) in self.tags.iter() {
+            mb = mb.with_tag(k, v);
         }
 
         mb.send();
