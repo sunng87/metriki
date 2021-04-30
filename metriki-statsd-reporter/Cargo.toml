@@ -14,8 +14,7 @@ readme = "../README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-metriki-core = { path = "../metriki-core", version = "^1.0"}
+metriki-core = { path = "../metriki-core", version = "1"}
 cadence = "0.25"
 derive_builder = "0.9.0"
-futures = { version = "0.3", features = ["executor"]}
 log = "0.4"

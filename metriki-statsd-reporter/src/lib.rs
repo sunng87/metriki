@@ -5,9 +5,8 @@ use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use cadence::prelude::*;
-use cadence::{Metric as StatsdMetric, MetricBuilder, StatsdClient, UdpMetricSink};
+use cadence::{Metric as StatsdMetric, MetricBuilder, MetricError, StatsdClient, UdpMetricSink};
 use derive_builder::Builder;
-use futures::executor;
 use log::warn;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
@@ -34,12 +33,18 @@ fn system_time_millis() -> u128 {
         .as_millis()
 }
 
+fn statsd_client_error_handler(err: MetricError) {
+    warn!("Metriki statsd reporter error: {}", err);
+}
+
 impl StatsdReporter {
     fn new_client(&self) -> StatsdClient {
         let host = (self.host, self.port);
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
         let sink = UdpMetricSink::from(host, socket).unwrap();
-        StatsdClient::from_sink(&self.prefix, sink)
+        StatsdClient::builder(&self.prefix, sink)
+            .with_error_handler(statsd_client_error_handler)
+            .build()
     }
 
     pub fn start(self) {
@@ -75,10 +80,10 @@ impl StatsdReporter {
     }
 
     fn report_meter(&self, name: &str, meter: &Meter, client: &StatsdClient) {
-        self.send(client.meter_with_tags(format!("{}.m1_rate", name), meter.m1_rate() as u64));
-        self.send(client.meter_with_tags(format!("{}.m5_rate", name), meter.m5_rate() as u64));
-        self.send(client.meter_with_tags(format!("{}.m15_rate", name), meter.m15_rate() as u64));
-        self.send(client.meter_with_tags(format!("{}.mean_rate", name), meter.mean_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.m1_rate", name), meter.m1_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.m5_rate", name), meter.m5_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.m15_rate", name), meter.m15_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.mean_rate", name), meter.mean_rate() as u64));
     }
 
     fn report_gauge(&self, name: &str, gauge: &Gauge, client: &StatsdClient) {
@@ -86,37 +91,59 @@ impl StatsdReporter {
         self.send(client.gauge_f64_with_tags(name, value));
     }
 
-    fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot) -> WriteQuery {
-        self.with_query(name)
-            .add_field("p50", snapshot.quantile(0.5))
-            .add_field("p75", snapshot.quantile(0.75))
-            .add_field("p90", snapshot.quantile(0.90))
-            .add_field("p99", snapshot.quantile(0.99))
-            .add_field("p999", snapshot.quantile(0.999))
-            .add_field("min", snapshot.min())
-            .add_field("max", snapshot.max())
-            .add_field("mean", snapshot.mean())
+    fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot, client: &StatsdClient) {
+        self.send(
+            client.histogram_with_tags(&format!("{}.p50", name), snapshot.quantile(0.5) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p75", name), snapshot.quantile(0.75) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p90", name), snapshot.quantile(0.9) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p99", name), snapshot.quantile(0.99) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p999", name), snapshot.quantile(0.999) as u64),
+        );
+        self.send(client.histogram_with_tags(&format!("{}.min", name), snapshot.min() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.max", name), snapshot.max() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.mean", name), snapshot.mean() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.count", name), snapshot.count()));
     }
 
-    fn report_counter(&self, name: &str, c: &Counter) -> WriteQuery {
-        self.with_query(name).add_field("value", c.value())
+    fn report_counter(&self, name: &str, c: &Counter, client: &StatsdClient) {
+        self.send(client.count_with_tags(name, c.value()));
     }
 
-    fn report_timer(&self, name: &str, t: &Timer) -> WriteQuery {
+    fn report_timer(&self, name: &str, t: &Timer, client: &StatsdClient) {
         let rate = t.rate();
         let latency = t.latency();
 
-        self.with_query(name)
-            .add_field("p50", latency.quantile(0.5))
-            .add_field("p75", latency.quantile(0.75))
-            .add_field("p90", latency.quantile(0.90))
-            .add_field("p99", latency.quantile(0.99))
-            .add_field("p999", latency.quantile(0.999))
-            .add_field("min", latency.min())
-            .add_field("max", latency.max())
-            .add_field("mean", latency.mean())
-            .add_field("m1", rate.m1_rate())
-            .add_field("m5", rate.m5_rate())
-            .add_field("m15", rate.m15_rate())
+        self.send(
+            client.histogram_with_tags(&format!("{}.p50", name), latency.quantile(0.5) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p75", name), latency.quantile(0.75) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p90", name), latency.quantile(0.9) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p99", name), latency.quantile(0.99) as u64),
+        );
+        self.send(
+            client.histogram_with_tags(&format!("{}.p999", name), latency.quantile(0.999) as u64),
+        );
+        self.send(client.histogram_with_tags(&format!("{}.min", name), latency.min() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.max", name), latency.max() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.mean", name), latency.mean() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.count", name), latency.count()));
+
+        self.send(client.meter_with_tags(&format!("{}.m1_rate", name), rate.m1_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.m5_rate", name), rate.m5_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.m15_rate", name), rate.m15_rate() as u64));
+        self.send(client.meter_with_tags(&format!("{}.mean_rate", name), rate.mean_rate() as u64));
     }
 }
