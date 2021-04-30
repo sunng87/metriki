@@ -11,6 +11,7 @@ use log::warn;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 
+/// Reporter for Statsd and Statsd protocol compatible sinks.
 #[derive(Builder, Debug)]
 pub struct StatsdReporter {
     registry: Arc<MetricsRegistry>,
