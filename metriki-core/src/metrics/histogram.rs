@@ -1,79 +1,73 @@
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
-use exponential_decay_histogram::{ExponentialDecayHistogram, Snapshot};
+use hdrhistogram::Histogram as HdrHistogram;
 
 #[cfg(feature = "ser")]
 use serde::ser::SerializeMap;
 #[cfg(feature = "ser")]
 use serde::{Serialize, Serializer};
 
+const DEFAULT_RANGE_MAX: u64 = 3600 * 24;
+
 /// Histograms are used to record the distribution of data over time.
 ///
-/// By default, `Histogram` uses exponential decay algorithm to avoid
-/// record too much data in memory.
+/// By default, `Histogram` uses HdrHistogram for better data accuracy
+/// and smaller memory footprint.
 #[derive(Debug)]
 pub struct Histogram {
-    inner: Arc<Mutex<ExponentialDecayHistogram>>,
-    count: AtomicU64,
+    inner: Arc<RwLock<HdrHistogram<u64>>>,
 }
 
+#[derive(Debug)]
 pub struct HistogramSnapshot {
-    inner: Snapshot,
-    count: u64,
+    inner: Arc<RwLock<HdrHistogram<u64>>>,
 }
 
 impl Histogram {
     pub(crate) fn new() -> Histogram {
-        let inner = ExponentialDecayHistogram::builder().build();
+        let inner = HdrHistogram::<u64>::new_with_bounds(1, DEFAULT_RANGE_MAX, 2).unwrap();
 
         Histogram {
-            inner: Arc::new(Mutex::new(inner)),
-            count: AtomicU64::new(0),
+            inner: Arc::new(RwLock::new(inner)),
         }
     }
 
-    pub fn update(&self, value: i64) {
-        let mut inner = self.inner.lock().unwrap();
-        inner.update(value as i64);
-        self.count.fetch_add(1, Ordering::Relaxed);
+    pub fn update(&self, value: u64) {
+        let mut inner = self.inner.write().unwrap();
+        let value = value.min(DEFAULT_RANGE_MAX);
+        // ignore the error
+        inner.record(value).ok();
     }
 
     pub fn snapshot(&self) -> HistogramSnapshot {
-        let inner = self.inner.lock().unwrap();
-        let snapshot = inner.snapshot();
-        let count = self.count.load(Ordering::Relaxed);
-
-        HistogramSnapshot {
-            inner: snapshot,
-            count,
-        }
+        let snapshot = self.inner.clone();
+        HistogramSnapshot { inner: snapshot }
     }
 }
 
 impl HistogramSnapshot {
     pub fn count(&self) -> u64 {
-        self.count
+        self.inner.read().unwrap().len()
     }
 
     pub fn mean(&self) -> f64 {
-        self.inner.mean()
+        self.inner.read().unwrap().mean()
     }
 
-    pub fn max(&self) -> i64 {
-        self.inner.max()
+    pub fn max(&self) -> u64 {
+        self.inner.read().unwrap().max()
     }
 
-    pub fn min(&self) -> i64 {
-        self.inner.min()
+    pub fn min(&self) -> u64 {
+        self.inner.read().unwrap().min()
     }
 
     pub fn stddev(&self) -> f64 {
-        self.inner.stddev()
+        self.inner.read().unwrap().stdev()
     }
 
-    pub fn quantile(&self, quantile: f64) -> i64 {
-        self.inner.value(quantile)
+    pub fn quantile(&self, quantile: f64) -> u64 {
+        self.inner.read().unwrap().value_at_quantile(quantile)
     }
 }
 
@@ -98,5 +92,26 @@ impl Serialize for Histogram {
         map.serialize_entry("p999", &snapshot.quantile(0.999))?;
 
         map.end()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Histogram, DEFAULT_RANGE_MAX};
+
+    #[test]
+    fn test_histogram_range() {
+        let histogram = Histogram::new();
+
+        histogram.update(0);
+        histogram.update(1);
+        histogram.update(1000);
+        histogram.update(DEFAULT_RANGE_MAX + 1);
+
+        let snapshot = histogram.snapshot();
+
+        assert_eq!(4, snapshot.count());
+        assert_eq!(0, snapshot.min());
+        // assert_eq!(DEFAULT_RANGE_MAX, snapshot.max());
     }
 }
