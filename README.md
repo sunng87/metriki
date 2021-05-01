@@ -6,7 +6,7 @@ Like Dropwizard Metrics, Metriki aggregates metrics on client-side and outputs l
 For now, it uses exponential decay and moving average algorithms to keep the memory footprint at
 a low level, while retaining the statistical information.
 
-## Features and TODOs
+## Components
 
 - Metrics [(doc)](https://docs.rs/metriki-core/) [(crate)](https://crates.io/crates/metriki-core)
 - Reporters / Exporters
@@ -14,6 +14,7 @@ a low level, while retaining the statistical information.
   - [x] influxdb [(doc)](https://docs.rs/metriki-influxdb-reporter/) [(crate)](https://crates.io/crates/metriki-influxdb-reporter)
   - [x] riemann [(doc)](https://docs.rs/metriki-riemann-reporter/) [(crate)](https://crates.io/crates/metriki-riemann-reporter)
   - [x] prometheus [(doc)](https://docs.rs/metriki-prometheus-exporter/) [(crate)](https://crates.io/crates/metriki-promethes-exporter)
+  - [x] statsd [(doc)](https://docs.rs/metriki-statsd-reporter/) [(crate)](https://crates.io/crates/metriki-statsd-reporter)
 - Instruments
   - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp)
   - [ ] ?reqwest
