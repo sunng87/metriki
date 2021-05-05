@@ -9,6 +9,7 @@ use serde::{Serialize, Serializer};
 
 use crate::filter::MetricsFilter;
 use crate::metrics::*;
+use crate::mset::MetricsSet;
 
 /// Entrypoint of all metrics
 ///
@@ -29,6 +30,7 @@ impl Debug for MetricsRegistry {
 #[derive(Default, Debug)]
 struct Inner {
     metrics: HashMap<String, Metric>,
+    mset: HashMap<String, Box<dyn MetricsSet + 'static>>,
 }
 
 impl MetricsRegistry {
@@ -168,6 +170,8 @@ impl MetricsRegistry {
     ///
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
+        // TODO: metrics set
+
         let inner = self.inner.read().unwrap();
         if let Some(ref filter) = self.filter {
             let mut results = HashMap::new();
@@ -187,6 +191,16 @@ impl MetricsRegistry {
     ///
     pub fn set_filter(&mut self, filter: Option<Box<dyn MetricsFilter + 'static>>) {
         self.filter = filter;
+    }
+
+    pub fn register_metrics_set(&self, name: &str, mset: Box<dyn MetricsSet + 'static>) {
+        let mut inner = self.inner.write().unwrap();
+        inner.mset.insert(name.to_owned(), mset);
+    }
+
+    pub fn unregister_metrics_set(&self, name: &str) {
+        let mut inner = self.inner.write().unwrap();
+        inner.mset.remove(name);
     }
 }
 

@@ -62,6 +62,7 @@
 
 mod filter;
 pub mod metrics;
+mod mset;
 mod registry;
 mod utils;
 

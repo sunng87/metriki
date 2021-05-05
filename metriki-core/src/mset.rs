@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use super::Metric;
+use crate::metrics::Metric;
 
 pub trait MetricsSet: Debug {
     fn get_all(&self) -> Vec<Metric>;
