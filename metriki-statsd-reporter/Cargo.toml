@@ -8,10 +8,8 @@ license = "MIT/Apache-2.0"
 keywords = ["observability", "metrics", "monitoring", "statsd"]
 homepage = "https://github.com/sunng87/metriki"
 repository = "https://github.com/sunng87/metriki"
-documentation = "https://docs.rs/metriki-influxdb-reporter/"
+documentation = "https://docs.rs/metriki-statsd-reporter/"
 readme = "../README.md"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 metriki-core = { path = "../metriki-core", version = "1"}
