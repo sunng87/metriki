@@ -170,20 +170,26 @@ impl MetricsRegistry {
     ///
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
-        // TODO: metrics set
-
         let inner = self.inner.read().unwrap();
-        if let Some(ref filter) = self.filter {
-            let mut results = HashMap::new();
-            for (k, v) in inner.metrics.iter() {
-                if filter.accept(k, v) {
+        let filter = self.filter.as_ref();
+
+        let mut results = HashMap::new();
+
+        for (k, v) in inner.metrics.iter() {
+            if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
+                results.insert(k.to_owned(), v.clone());
+            }
+        }
+        for metrics_set in inner.mset.values() {
+            let metrics = metrics_set.get_all();
+            for (k, v) in metrics.iter() {
+                if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
                     results.insert(k.to_owned(), v.clone());
                 }
             }
-            results
-        } else {
-            inner.metrics.clone()
         }
+
+        results
     }
 
     /// Set a filter for this registry.
