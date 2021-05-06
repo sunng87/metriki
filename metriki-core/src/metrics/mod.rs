@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
 #[cfg(feature = "ser")]
-use serde::ser::SerializeSeq;
-#[cfg(feature = "ser")]
 use serde::{Serialize, Serializer};
 
 mod counter;
