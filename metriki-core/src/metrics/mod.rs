@@ -20,6 +20,33 @@ pub enum Metric {
     Counter(Arc<Counter>),
 }
 
+impl Metric {
+    /// Create default meter
+    pub fn meter() -> Meter {
+        Meter::new()
+    }
+
+    /// Create default timer
+    pub fn timer() -> Timer {
+        Timer::new()
+    }
+
+    /// Create gauge with given function
+    pub fn gauge(f: GaugeFn) -> Gauge {
+        Gauge::new(f)
+    }
+
+    /// Create default histogram
+    pub fn histogram() -> Histogram {
+        Histogram::new()
+    }
+
+    /// Create default counter
+    pub fn counter() -> Counter {
+        Counter::new()
+    }
+}
+
 #[cfg(feature = "ser")]
 impl Serialize for Metric {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
