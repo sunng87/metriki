@@ -47,6 +47,36 @@ impl Metric {
     }
 }
 
+impl From<Meter> for Metric {
+    fn from(f: Meter) -> Metric {
+        Metric::Meter(Arc::new(f))
+    }
+}
+
+impl From<Timer> for Metric {
+    fn from(f: Timer) -> Metric {
+        Metric::Timer(Arc::new(f))
+    }
+}
+
+impl From<Counter> for Metric {
+    fn from(f: Counter) -> Metric {
+        Metric::Counter(Arc::new(f))
+    }
+}
+
+impl From<Gauge> for Metric {
+    fn from(f: Gauge) -> Metric {
+        Metric::Gauge(Arc::new(f))
+    }
+}
+
+impl From<Histogram> for Metric {
+    fn from(f: Histogram) -> Metric {
+        Metric::Histogram(Arc::new(f))
+    }
+}
+
 #[cfg(feature = "ser")]
 impl Serialize for Metric {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
