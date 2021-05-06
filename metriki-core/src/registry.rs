@@ -193,11 +193,20 @@ impl MetricsRegistry {
         self.filter = filter;
     }
 
+    /// Register a MetricsSet implementation.
+    ///
+    /// A MetricsSet returns a set of metrics when `snapshots()` is called on
+    /// the registry. This provides dynamic metrics that can be added into registry
+    /// based custom rules.
+    ///
+    /// The name has nothing to do with metrics it added to `snapshots()` results.
+    /// It's just for identify the metrics set for dedup and removal.
     pub fn register_metrics_set(&self, name: &str, mset: Box<dyn MetricsSet + 'static>) {
         let mut inner = self.inner.write().unwrap();
         inner.mset.insert(name.to_owned(), mset);
     }
 
+    /// Unregister a MetricsSet implementation by its name.
     pub fn unregister_metrics_set(&self, name: &str) {
         let mut inner = self.inner.write().unwrap();
         inner.mset.remove(name);
