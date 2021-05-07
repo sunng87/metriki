@@ -3,6 +3,14 @@ use std::fmt::Debug;
 
 use crate::metrics::Metric;
 
+/// The `MetricsSet` trait defines a structure that provides
+/// dynamic metrics to the registry.
+///
+/// By default, all metrics created from `MetricsRegistry` are
+/// static ones. Once it was created the registry holds and tracks
+/// it automatically. in contrast, `MetricsSet` is pulled by registry
+/// to provide metrics everytime. This is useful to implement features
+/// like "Top 10 APIs".
 pub trait MetricsSet: Send + Sync + Debug {
     fn get_all(&self) -> HashMap<String, Metric>;
 }
