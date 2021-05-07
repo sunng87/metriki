@@ -30,7 +30,7 @@ impl Debug for MetricsRegistry {
 #[derive(Default, Debug)]
 struct Inner {
     metrics: HashMap<String, Metric>,
-    mset: HashMap<String, Box<dyn MetricsSet + 'static>>,
+    mset: HashMap<String, Arc<dyn MetricsSet + 'static>>,
 }
 
 impl MetricsRegistry {
@@ -207,7 +207,7 @@ impl MetricsRegistry {
     ///
     /// The name has nothing to do with metrics it added to `snapshots()` results.
     /// It's just for identify the metrics set for dedup and removal.
-    pub fn register_metrics_set(&self, name: &str, mset: Box<dyn MetricsSet + 'static>) {
+    pub fn register_metrics_set(&self, name: &str, mset: Arc<dyn MetricsSet + 'static>) {
         let mut inner = self.inner.write().unwrap();
         inner.mset.insert(name.to_owned(), mset);
     }

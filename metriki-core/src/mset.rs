@@ -18,6 +18,7 @@ pub trait MetricsSet: Send + Sync + Debug {
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     use super::MetricsSet;
     use crate::metrics::Metric;
@@ -41,7 +42,7 @@ mod test {
     #[test]
     fn test_metrics_set() {
         let registry = MetricsRegistry::new();
-        registry.register_metrics_set("dummy", Box::new(DummyMetricsSet));
+        registry.register_metrics_set("dummy", Arc::new(DummyMetricsSet));
         registry.counter("test.default.counter").inc(1);
 
         let snapshots = registry.snapshots();
