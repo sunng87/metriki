@@ -29,6 +29,15 @@ a low level, while retaining the statistical information.
 - **Timer**: a combination of meter and histogram.
 - **Gauge**: a function that provides value when queried.
 
+### MetricsRegistry
+
+An entrypoint and holder of all metrics.
+
+### MetricsSet
+
+A trait to be implemented so that dynamic metrics can be added into registry. Metrics from the set
+are pulled into registry everytime when reporters and exporters pulling values from the registry.
+
 ### Reporter
 
 A component to report metric data periodically. Typically used for data sinks which has a push-model.

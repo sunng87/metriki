@@ -62,8 +62,10 @@
 
 mod filter;
 pub mod metrics;
+mod mset;
 mod registry;
 mod utils;
 
 pub use filter::MetricsFilter;
+pub use mset::MetricsSet;
 pub use registry::MetricsRegistry;

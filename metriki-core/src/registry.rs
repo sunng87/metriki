@@ -9,6 +9,7 @@ use serde::{Serialize, Serializer};
 
 use crate::filter::MetricsFilter;
 use crate::metrics::*;
+use crate::mset::MetricsSet;
 
 /// Entrypoint of all metrics
 ///
@@ -29,6 +30,7 @@ impl Debug for MetricsRegistry {
 #[derive(Default, Debug)]
 struct Inner {
     metrics: HashMap<String, Metric>,
+    mset: HashMap<String, Arc<dyn MetricsSet + 'static>>,
 }
 
 impl MetricsRegistry {
@@ -169,17 +171,25 @@ impl MetricsRegistry {
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
         let inner = self.inner.read().unwrap();
-        if let Some(ref filter) = self.filter {
-            let mut results = HashMap::new();
-            for (k, v) in inner.metrics.iter() {
-                if filter.accept(k, v) {
+        let filter = self.filter.as_ref();
+
+        let mut results = HashMap::new();
+
+        for (k, v) in inner.metrics.iter() {
+            if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
+                results.insert(k.to_owned(), v.clone());
+            }
+        }
+        for metrics_set in inner.mset.values() {
+            let metrics = metrics_set.get_all();
+            for (k, v) in metrics.iter() {
+                if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
                     results.insert(k.to_owned(), v.clone());
                 }
             }
-            results
-        } else {
-            inner.metrics.clone()
         }
+
+        results
     }
 
     /// Set a filter for this registry.
@@ -187,6 +197,25 @@ impl MetricsRegistry {
     ///
     pub fn set_filter(&mut self, filter: Option<Box<dyn MetricsFilter + 'static>>) {
         self.filter = filter;
+    }
+
+    /// Register a MetricsSet implementation.
+    ///
+    /// A MetricsSet returns a set of metrics when `snapshots()` is called on
+    /// the registry. This provides dynamic metrics that can be added into registry
+    /// based custom rules.
+    ///
+    /// The name has nothing to do with metrics it added to `snapshots()` results.
+    /// It's just for identify the metrics set for dedup and removal.
+    pub fn register_metrics_set(&self, name: &str, mset: Arc<dyn MetricsSet + 'static>) {
+        let mut inner = self.inner.write().unwrap();
+        inner.mset.insert(name.to_owned(), mset);
+    }
+
+    /// Unregister a MetricsSet implementation by its name.
+    pub fn unregister_metrics_set(&self, name: &str) {
+        let mut inner = self.inner.write().unwrap();
+        inner.mset.remove(name);
     }
 }
 
