@@ -56,7 +56,7 @@ impl<'a> TimerContext<'a> {
         let elapsed = Instant::now() - self.start_at;
         let elapsed_ms = elapsed.as_millis();
 
-        self.timer.latency.update(elapsed_ms as i64);
+        self.timer.latency.update(elapsed_ms as u64);
     }
 }
 

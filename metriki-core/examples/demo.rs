@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // histogram
     do_times!(1000, {
         mr.histogram("example.histogram")
-            .update((rand::random::<f64>() * 100f64) as i64);
+            .update((rand::random::<f64>() * 100f64) as u64);
     });
     let snapshot = mr.histogram("example.histogram").snapshot();
     println!("p90 for example.histogram: {}", snapshot.quantile(0.9));
