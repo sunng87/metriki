@@ -43,6 +43,46 @@ impl Metric {
     pub fn counter() -> Arc<Counter> {
         Counter::new().into()
     }
+
+    /// Convert the Metric to `Meter`
+    pub fn as_meter(&self) -> Option<Arc<Meter>> {
+        match self {
+            Metric::Meter(m) => Some(m.clone()),
+            _ => None,
+        }
+    }
+
+    /// Convert the Metric to `Timer`
+    pub fn as_timer(&self) -> Option<Arc<Timer>> {
+        match self {
+            Metric::Timer(m) => Some(m.clone()),
+            _ => None,
+        }
+    }
+
+    /// Convert the Metric to `Gauge`
+    pub fn as_gauge(&self) -> Option<Arc<Gauge>> {
+        match self {
+            Metric::Gauge(m) => Some(m.clone()),
+            _ => None,
+        }
+    }
+
+    /// Convert the Metric to `Histogram`
+    pub fn as_histogram(&self) -> Option<Arc<Histogram>> {
+        match self {
+            Metric::Histogram(m) => Some(m.clone()),
+            _ => None,
+        }
+    }
+
+    /// Convert the Metric to `Counter`
+    pub fn as_counter(&self) -> Option<Arc<Counter>> {
+        match self {
+            Metric::Counter(m) => Some(m.clone()),
+            _ => None,
+        }
+    }
 }
 
 impl From<Arc<Meter>> for Metric {
