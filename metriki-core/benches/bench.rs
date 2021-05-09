@@ -19,7 +19,7 @@ fn bench_histogram_update(b: &mut Bencher) {
 
     b.iter(|| {
         rg.histogram("test.histogram")
-            .update((rand::random::<f64>() * 1000.0) as i64)
+            .update((rand::random::<f64>() * 1000.0) as u64)
     });
 }
 
