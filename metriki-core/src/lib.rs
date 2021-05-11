@@ -61,6 +61,7 @@
 //!
 
 mod filter;
+pub mod global;
 pub mod metrics;
 mod mset;
 mod registry;
