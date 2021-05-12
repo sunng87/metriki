@@ -2,8 +2,8 @@
 //!
 //! Metriki-core is a metrics library that ported from Coda Hale's Dropwizard Metrics.
 //!
-//! This library heavily relies on exponential moving average and exponential decay algorithms
-//! for its meter and histogram implementation. So it won't stop all the samples in memory and
+//! This library heavily relies on exponential moving average and HDR histogram for its
+//! meter and histogram implementation. So it won't stop all the samples in memory and
 //! works great on application with heavy load.
 //!
 //! Currently the library supports five kinds of metrics, includes:
@@ -11,20 +11,23 @@
 //! * Meter: a measure for rate, useful for tracking QPS, error rate, etc.
 //! * Histogram: distribution of a series of numerical data
 //! * Timer: a combination of meter and histogram, for tracking latency and rate at the same time
-//! * Counter: just counter
+//! * Counter: a value can be increased and decreased
 //! * Gauge: a function that reports a value when it is called
+//! * MetricsSet: a trait to be implemented and to give dynamic metrics when called by registry
 //!
 //! ## Ecosystem
 //!
-//! ### Reporters
+//! ### Reporters and Exporters
 //!
-//! Like Dropwizard Metrics, reporters are component that fetches data from registry and sents
+//! Like Dropwizard Metrics, reporters are components that fetch data from registry and push
 //! to some destination.
 //!
 //! A [Log reporter](https://github.com/sunng87/metriki/tree/master/metriki-log-reporter) is
 //! the reference implementation.
 //!
-//! ### Integrations
+//! `Exporters` are components that serve metrics data for pull-based services, like Promethus.
+//!
+//! ### Instruments
 //!
 //! We will try to integrate metriki with some common libraries/frameworks of Rust ecosystem,
 //! includes web frameworks, net programming frameworks, database connectors, etc.
@@ -32,6 +35,10 @@
 //! ## Usage
 //!
 //! Create a `MetricsRegistry` for your application as the entrypoint and holder of all metrics.
+//!
+//! Metriki allows you to create multiple registry that serves different metrics and reporters.
+//! However, for most cases, you can use the built-in global registry
+//! `metriki_core::global::global_registry` as a singleton instance for all your application.
 //!
 //! ```
 //! use metriki_core::MetricsRegistry;
