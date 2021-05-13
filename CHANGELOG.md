@@ -1,5 +1,11 @@
 # Change Log
 
+## Core [1.3.0] - 2021-05-13
+
+### Added
+
+* Global instance of `MetricRegistry` is added at `metriki_core::global::global_registry()`.
+
 ## Core [1.2.0] - 2021-05-10
 
 ### Added
