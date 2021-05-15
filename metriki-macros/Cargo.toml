@@ -17,6 +17,7 @@ readme = "../README.md"
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 syn = { version = "1", features = ["full"] }
 quote = "1"
+proc-macro2 = "1"
 
 [lib]
 proc-macro = true

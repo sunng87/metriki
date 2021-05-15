@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, ItemFn, Lit, Meta, NestedMeta, Result as SynResult, Token};
+use syn::{parse_macro_input, Expr, ItemFn, Lit, LitStr, Meta, Result as SynResult, Token};
 
 #[derive(Debug)]
 struct TimedAttributes {
@@ -41,7 +42,7 @@ impl Parse for TimedAttributes {
             registry: hash
                 .get("registry")
                 .cloned()
-                .unwrap_or_else(|| "::metriki_core::global::global_registry()".to_owned()),
+                .unwrap_or_else(|| "metriki_core::global::global_registry()".to_owned()),
             name: hash.get("name").cloned().unwrap(),
         })
     }
@@ -49,10 +50,31 @@ impl Parse for TimedAttributes {
 
 #[proc_macro_attribute]
 pub fn timed(attrs: TokenStream, input: TokenStream) -> TokenStream {
-    //    let input_fn = parse_macro_input!(input as ItemFn);
-    let attrs = parse_macro_input!(attrs as TimedAttributes);
+    let f = parse_macro_input!(input as ItemFn);
+    let timer_data = parse_macro_input!(attrs as TimedAttributes);
 
-    dbg!(attrs);
+    // function data
+    let ItemFn {
+        attrs,
+        vis,
+        sig,
+        block,
+    } = f;
+    let stmts = &block.stmts;
 
-    input
+    // FIXME: unwrap
+    let registry_expr: Expr = syn::parse_str(&timer_data.registry).unwrap();
+    let name = Lit::Str(LitStr::new(&timer_data.name, Span::call_site()));
+
+    // generated code
+    let tokens = quote! {
+        #(#attrs)*
+        #vis #sig {
+            let __timer = #registry_expr.timer(#name);
+            let __timer_ctx = __timer.start();
+
+            #(#stmts)*
+        }
+    };
+    tokens.into()
 }
