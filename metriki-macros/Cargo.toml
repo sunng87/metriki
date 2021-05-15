@@ -1,0 +1,22 @@
+[package]
+name = "metriki-macros"
+version = "0.1.0"
+authors = ["Ning Sun <sunng@protonmail.com>"]
+edition = "2018"
+description = "Macros for metriki"
+license = "MIT/Apache-2.0"
+keywords = ["observability", "metrics", "monitoring"]
+homepage = "https://github.com/sunng87/metriki"
+repository = "https://github.com/sunng87/metriki"
+documentation = "https://docs.rs/metriki-macros/"
+readme = "../README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+metriki-core = { path = "../metriki-core", version = "^1.0"}
+syn = { version = "1", features = ["full"] }
+quote = "1"
+
+[lib]
+proc-macro = true
