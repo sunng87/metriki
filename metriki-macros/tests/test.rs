@@ -21,6 +21,9 @@ fn my_example_f3(local_registry: Arc<MetricsRegistry>) {
     dbg!("456");
 }
 
+#[metered]
+fn my_example_f4() {}
+
 #[test]
 fn test_my_example_f1() {
     my_example_f1();
@@ -44,4 +47,12 @@ fn test_my_example_f3() {
 
     let s = local_registry.snapshots();
     assert!(s.contains_key("my_example_f3"));
+}
+
+#[test]
+fn test_my_example_f4() {
+    my_example_f4();
+
+    let s = global_registry().snapshots();
+    assert!(s.contains_key("my_example_f4"));
 }
