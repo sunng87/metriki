@@ -40,6 +40,15 @@ impl Parse for FnMetricsAttributes {
     }
 }
 
+/// `timed` macro is design as an attibute for function.
+///
+/// The macro adds timer metric for the function execution.
+///
+/// Available options:
+///
+/// * `registry`: the code to access `MetricsRegistry`. `global_registry()` by default.
+/// * `name`: name for the timer metric. Function name is used by default,
+///   be careful with name conflict in different module because the macro cannot detect the module name.
 #[proc_macro_attribute]
 pub fn timed(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let f = parse_macro_input!(input as ItemFn);
@@ -74,6 +83,13 @@ pub fn timed(attrs: TokenStream, input: TokenStream) -> TokenStream {
     tokens.into()
 }
 
+/// `metered` attribute adds a meter to current function.
+///
+/// Available options:
+///
+/// * `registry`: the code to access `MetricsRegistry`. `global_registry()` by default.
+/// * `name`: name for the timer metric. Function name is used by default,
+///   be careful with name conflict in different module because the macro cannot detect the module name.
 #[proc_macro_attribute]
 pub fn metered(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let f = parse_macro_input!(input as ItemFn);
