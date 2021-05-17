@@ -1,6 +1,6 @@
 [package]
 name = "metriki-macros"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Macros for metriki"
@@ -14,10 +14,12 @@ readme = "../README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-metriki-core = { path = "../metriki-core", version = "^1.0"}
 syn = { version = "1", features = ["full"] }
 quote = "1"
 proc-macro2 = "1"
+
+[dev-dependencies]
+metriki-core = { path = "../metriki-core", version = "^1.0"}
 
 [lib]
 proc-macro = true

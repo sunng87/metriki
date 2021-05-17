@@ -66,6 +66,8 @@
 //! }))
 //! ```
 //!
+//!
+//!
 
 mod filter;
 pub mod global;
@@ -77,3 +79,6 @@ mod utils;
 pub use filter::MetricsFilter;
 pub use mset::MetricsSet;
 pub use registry::MetricsRegistry;
+
+#[cfg(feature = "macros")]
+pub use metriki_macros::{metered, timed};
