@@ -49,6 +49,8 @@ impl MetricsRegistry {
     /// Meter a metric to measure rate of an event. It will report rate in 1 minute,
     /// 5 minutes and 15 minutes, which is similar to Linux load.
     ///
+    /// # Panics
+    ///
     /// This function may panic if a metric is already registered with type other than meter.
     pub fn meter(&self, name: &str) -> Arc<Meter> {
         let meter = {
@@ -77,6 +79,8 @@ impl MetricsRegistry {
     /// Histogram a metric to measure distribution of a series of data. The distribution will
     /// be reported with `max`, `min`, `mean`, `stddev` and the value at particular percentile.
     ///
+    /// # Panics
+    ///
     /// This function may panic if a metric is already registered with type other than histogram.
     pub fn histogram(&self, name: &str) -> Arc<Histogram> {
         let histo = {
@@ -103,6 +107,8 @@ impl MetricsRegistry {
     /// Return `Counter` that has been registered and create if not found.
     ///
     /// Counter a metric to measure the number of some state.
+    ///
+    /// # Panics
     ///
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn counter(&self, name: &str) -> Arc<Counter> {
@@ -131,6 +137,8 @@ impl MetricsRegistry {
     ///
     /// Timer is a combination of meter and histogram. The meter part is to track rate of
     /// the event. And the histogram part maintains the distribution of time spent for the event.
+    ///
+    /// # Panics
     ///
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn timer(&self, name: &str) -> Arc<Timer> {
