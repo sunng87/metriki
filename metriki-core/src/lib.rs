@@ -66,6 +66,26 @@
 //! }))
 //! ```
 //!
+//! ## Macros
+//!
+//! Metriki ships attribute macros `timed` and `metered` to track function execution.
+//!
+//! This can be turned on with `macros` feature enabled.
+//!
+//! ```skip
+//! // A timer `my.example.fn1` is created to track rate and latency of `example_fn1` calls
+//! #[timed(name="my.example.fn1")]
+//! fn example_fn1() {
+//!   // ...
+//! }
+//!
+//! // A meter `my.example.fn2` is created to track rate of `example_fn2` calls
+//! #[metered(name="my.example.fn2")]
+//! fn example_fn2() {
+//!   // ...
+//! }
+//!
+//! ```
 //!
 //!
 

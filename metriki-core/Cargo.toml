@@ -30,3 +30,6 @@ macros = ["metriki-macros"]
 
 [dev-dependencies]
 rand = "0.8"
+
+[package.metadata."docs.rs"]
+all-features = true
