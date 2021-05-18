@@ -4,6 +4,7 @@
 members = ["metriki-core",
            "metriki-influxdb-reporter",
            "metriki-log-reporter",
+           "metriki-macros",
            "metriki-prometheus-exporter",
            "metriki-riemann-reporter",
            "metriki-statsd-reporter",
