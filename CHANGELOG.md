@@ -1,5 +1,11 @@
 # Change Log
 
+## Core [1.4.0] - 2021-06-02
+
+### Added
+
+* Macro features: built-in macros `#[timed]` and `#[metered]`.
+
 ## Core [1.3.0] - 2021-05-13
 
 ### Added
