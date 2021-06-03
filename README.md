@@ -4,13 +4,28 @@ Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dr
 
 Like Dropwizard Metrics, Metriki aggregates metrics on client-side and outputs limited amount data.
 
+## Quick Start
+
 ```rust
+// create a timer to track the execution rate and latency of this function
+// to use macros you will need to turn on `macros` feature of metriki_core
 #[timed]
 fn your_function() {
   // a function metered by a timer for its rate and latency
 }
 
 use metriki_core::global::global_registry;
+use metriki_influxdb_reporter::InfluxDbReporterBuilder;
+
+// by default, the timer is registered in this global_registry()
+let registry = global_registry();
+
+// start a reporter to send data into influxdb
+InfluxDbReporterBuilder::default()
+  .registry(registry.clone())
+  .build()
+  .start();
+
 ```
 
 ## Components
