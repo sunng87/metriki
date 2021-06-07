@@ -30,10 +30,14 @@ impl Timer {
         }
     }
 
+    /// Start a timer instance for recording.
+    /// The returned `TimerContext` can be stopped or dropped to record its timing.
     pub fn start(&self) -> TimerContext {
         self.start_at(Instant::now())
     }
 
+    /// Start a timer instance for recording that started at given time.
+    /// The returned `TimerContext` can be stopped or dropped to record its timing.
     pub fn start_at(&self, start_at: Instant) -> TimerContext {
         self.rate.mark();
         TimerContext {
@@ -42,10 +46,23 @@ impl Timer {
         }
     }
 
+    /// Execute closure and record its execution with this timer.
+    pub fn scoped<F, R>(&self, f: F) -> R
+    where
+        F: Fn() -> R,
+    {
+        let ctx = self.start();
+        let result = f();
+        ctx.stop();
+        result
+    }
+
+    /// Returns the rates of timer
     pub fn rate(&self) -> &Meter {
         &self.rate
     }
 
+    /// Returns the histogram of latency distribution of this timer
     pub fn latency(&self) -> HistogramSnapshot {
         self.latency.snapshot()
     }
