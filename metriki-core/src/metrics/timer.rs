@@ -131,9 +131,19 @@ mod test {
 
         {
             timer.start();
-            std::thread::sleep(Duration::from_millis(500));
+            std::thread::sleep(Duration::from_millis(10));
         }
 
         assert!(timer.rate().count() == 2);
+    }
+
+    #[test]
+    fn test_scoped_tiemr() {
+        let timer = Timer::new();
+
+        timer.scoped(|| {
+            std::thread::sleep(Duration::from_millis(10));
+        });
+        assert!(timer.rate().count() == 1);
     }
 }
