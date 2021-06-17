@@ -1,5 +1,12 @@
 # Change Log
 
+## Core [1.5.0] - 2021-06-17
+
+### Added
+
+* New timer API `scoped` to measure execution of a closure with this timer
+* `TimerContext` is exposed
+
 ## Core [1.4.0] - 2021-06-02
 
 ### Added
