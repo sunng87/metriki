@@ -45,10 +45,7 @@ impl TimerContextArc {
     /// The returned `TimerContext` can be stopped or dropped to record its timing.
     pub fn start_at(timer: Arc<Timer>, start_at: Instant) -> TimerContextArc {
         timer.rate.mark();
-        TimerContextArc {
-            start_at,
-            timer: timer.clone(),
-        }
+        TimerContextArc { start_at, timer }
     }
 
     /// Stop the timer context.
