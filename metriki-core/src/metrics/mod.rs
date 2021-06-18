@@ -135,4 +135,4 @@ pub use counter::Counter;
 pub use gauge::{Gauge, GaugeFn};
 pub use histogram::{Histogram, HistogramSnapshot};
 pub use meter::Meter;
-pub use timer::{Timer, TimerContext};
+pub use timer::{Timer, TimerContext, TimerContext2};

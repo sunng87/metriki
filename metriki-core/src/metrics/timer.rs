@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Instant;
 
 #[cfg(feature = "ser")]
@@ -20,6 +21,29 @@ pub struct Timer {
 pub struct TimerContext<'a> {
     start_at: Instant,
     timer: &'a Timer,
+}
+
+#[derive(Debug)]
+pub struct TimerContext2 {
+    start_at: Instant,
+    timer: Arc<Timer>,
+}
+
+impl TimerContext2 {
+    pub fn start(timer: Arc<Timer>) -> TimerContext2 {
+        timer.rate.mark();
+        TimerContext2 {
+            start_at: Instant::now(),
+            timer: timer.clone(),
+        }
+    }
+
+    pub fn stop(self) {
+        let elapsed = Instant::now() - self.start_at;
+        let elapsed_ms = elapsed.as_millis();
+
+        self.timer.latency.update(elapsed_ms as u64);
+    }
 }
 
 impl Timer {
