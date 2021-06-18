@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::task::{Context, Poll};
 
 use futures::{Future, FutureExt, TryFutureExt};
-use metriki_core::metrics::TimerContext2;
+use metriki_core::metrics::TimerContextArc;
 use metriki_core::MetricsRegistry;
 use tower_service::Service;
 
@@ -28,7 +28,7 @@ where
     fn call(&mut self, req: R) -> Self::Future {
         let registry = self.registry.clone();
         let timer = registry.timer("requests");
-        let timer_ctx = TimerContext2::start(timer);
+        let timer_ctx = TimerContextArc::start(timer);
 
         let f = self
             .inner

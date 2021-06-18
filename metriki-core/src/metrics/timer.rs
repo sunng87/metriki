@@ -23,21 +23,35 @@ pub struct TimerContext<'a> {
     timer: &'a Timer,
 }
 
+/// TimerContext holds a `Arc` reference of `Timer`.
+/// This API is designed for using in async scenario where context are passed
+/// across threads.
+///
+/// Note that this timer context requires explict `stop` to record its
+/// latency. The implicit drop doesn't apply to it.
 #[derive(Debug)]
-pub struct TimerContext2 {
+pub struct TimerContextArc {
     start_at: Instant,
     timer: Arc<Timer>,
 }
 
-impl TimerContext2 {
-    pub fn start(timer: Arc<Timer>) -> TimerContext2 {
+impl TimerContextArc {
+    /// Start the TimerContext from a `Arc` reference of `Timer`.
+    pub fn start(timer: Arc<Timer>) -> TimerContextArc {
+        TimerContextArc::start_at(timer, Instant::now())
+    }
+
+    /// Start a timer context for recording that started at given time.
+    /// The returned `TimerContext` can be stopped or dropped to record its timing.
+    pub fn start_at(timer: Arc<Timer>, start_at: Instant) -> TimerContextArc {
         timer.rate.mark();
-        TimerContext2 {
-            start_at: Instant::now(),
+        TimerContextArc {
+            start_at,
             timer: timer.clone(),
         }
     }
 
+    /// Stop the timer context.
     pub fn stop(self) {
         let elapsed = Instant::now() - self.start_at;
         let elapsed_ms = elapsed.as_millis();
@@ -54,13 +68,13 @@ impl Timer {
         }
     }
 
-    /// Start a timer instance for recording.
+    /// Start a timer context for recording.
     /// The returned `TimerContext` can be stopped or dropped to record its timing.
     pub fn start(&self) -> TimerContext {
         self.start_at(Instant::now())
     }
 
-    /// Start a timer instance for recording that started at given time.
+    /// Start a timer context for recording that started at given time.
     /// The returned `TimerContext` can be stopped or dropped to record its timing.
     pub fn start_at(&self, start_at: Instant) -> TimerContext {
         self.rate.mark();
