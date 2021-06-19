@@ -11,16 +11,13 @@ use tower_service::Service;
 
 pub struct MetricsService<S> {
     registry: Arc<MetricsRegistry>,
-    base_metric_name: Option<String>,
+    base_metric_name: String,
     inner: S,
 }
 
 impl<S> MetricsService<S> {
     fn name(&self) -> String {
-        self.base_metric_name
-            .as_ref()
-            .cloned()
-            .unwrap_or_else(|| "requests".to_owned())
+        self.base_metric_name.clone()
     }
 }
 
@@ -62,11 +59,20 @@ where
 }
 
 /// The tower layer to generate tower services for Metriki
+///
+/// The layer will generate a service to wrap your service and track
+/// exectuion of your service, by
+///
+/// * A timer to measure qps and processing latency
+/// * A meter to measure error rate
+///
+/// The timer name is provided with option `base_metric_name`, default to `requests`.
+/// The error meter is named as `{timer_name}.error`.
 #[derive(Builder, Debug)]
 pub struct MetricsLayer {
     registry: Arc<MetricsRegistry>,
-    #[builder(default, setter(into))]
-    base_metric_name: Option<String>,
+    #[builder(setter(into), default = "\"requests\".to_owned()")]
+    base_metric_name: String,
 }
 
 impl<S> Layer<S> for MetricsLayer {
