@@ -39,7 +39,8 @@ InfluxDbReporterBuilder::default()
   - [x] statsd [(doc)](https://docs.rs/metriki-statsd-reporter/) [(crate)](https://crates.io/crates/metriki-statsd-reporter)
 - Instruments
   - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp)
-  - [ ] ?reqwest
+  - [x] tower [(doc)](https://docs.rs/metriki-tower/) [(crate)](https://crates.io/crates/metriki-tower)
+  - [ ] reqwest
 
 ## Concepts
 

@@ -8,4 +8,5 @@ members = ["metriki-core",
            "metriki-prometheus-exporter",
            "metriki-riemann-reporter",
            "metriki-statsd-reporter",
+           "metriki-tower",
            "metriki-warp"]

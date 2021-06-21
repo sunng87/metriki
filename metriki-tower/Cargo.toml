@@ -1,0 +1,18 @@
+[package]
+name = "metriki-tower"
+version = "0.1.0"
+authors = ["Ning Sun <sunng@protonmail.com>"]
+edition = "2018"
+description = "Metriki integration with tower"
+license = "MIT/Apache-2.0"
+keywords = ["observability", "metrics", "monitoring", "tower"]
+homepage = "https://github.com/sunng87/metriki"
+repository = "https://github.com/sunng87/metriki"
+documentation = "https://docs.rs/metriki-tower/"
+
+[dependencies]
+tower-service = "0.3"
+tower-layer = "0.3"
+futures = "0.3"
+metriki-core = { path = "../metriki-core", version = "^1.0"}
+derive_builder = "0.9.0"
