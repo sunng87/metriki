@@ -12,7 +12,7 @@ pub struct LogReporter {
     #[builder(default, setter(into))]
     prefix: String,
     registry: Arc<MetricsRegistry>,
-    #[builder(default = "5")]
+    #[builder(default = "30")]
     interval_secs: u64,
     #[builder(default = "Level::Info")]
     level: Level,
