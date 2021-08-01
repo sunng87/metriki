@@ -1,8 +1,15 @@
 # Change Log
 
+## Tower [0.1.1] - 2021-08-01
+
+### Fixed
+
+* Fixed issue that tower middleware doesn't work with Hyper due to
+  `Send` trait not required
+
 ## Tower [0.1.0] - 2021-07-07
 
-Initial release of tower instrument. The module provides `MetricsLayer` and 
+Initial release of tower instrument. The module provides `MetricsLayer` and
 `MetricsService` for tower applications. Some built-in metrics are provided by default:
 
 * A timer to measure latency and rate
