@@ -9,6 +9,7 @@ use metriki_core::MetricsRegistry;
 use tower_layer::Layer;
 use tower_service::Service;
 
+#[derive(Debug, Clone)]
 pub struct MetricsService<S> {
     registry: Arc<MetricsRegistry>,
     base_metric_name: String,
@@ -21,12 +22,11 @@ impl<S> MetricsService<S> {
     }
 }
 
-type ResultFuture<R, E> = Pin<Box<dyn Future<Output = Result<R, E>>>>;
-
+type ResultFuture<R, E> = Pin<Box<dyn Future<Output = Result<R, E>> + Send>>;
 impl<S, R> Service<R> for MetricsService<S>
 where
-    S: Service<R>,
-    S::Future: 'static,
+    S: Service<R> + Send,
+    S::Future: Send + 'static,
 {
     type Response = S::Response;
     type Error = S::Error;
@@ -68,7 +68,7 @@ where
 ///
 /// The timer name is provided with option `base_metric_name`, default to `requests`.
 /// The error meter is named as `{timer_name}.error`.
-#[derive(Builder, Debug)]
+#[derive(Builder, Debug, Clone)]
 pub struct MetricsLayer {
     registry: Arc<MetricsRegistry>,
     #[builder(setter(into), default = "\"requests\".to_owned()")]
