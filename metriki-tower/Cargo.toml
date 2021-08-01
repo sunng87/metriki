@@ -9,6 +9,7 @@ keywords = ["observability", "metrics", "monitoring", "tower"]
 homepage = "https://github.com/sunng87/metriki"
 repository = "https://github.com/sunng87/metriki"
 documentation = "https://docs.rs/metriki-tower/"
+readme = "../README.md"
 
 [dependencies]
 tower-service = "0.3"
