@@ -1,13 +1,16 @@
-use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
 
 use derive_builder::Builder;
-use futures::{Future, FutureExt, TryFutureExt};
+use futures::{FutureExt, TryFutureExt};
 use metriki_core::metrics::TimerContextArc;
 use metriki_core::MetricsRegistry;
 use tower_layer::Layer;
 use tower_service::Service;
+
+mod common;
+
+use common::ResultFuture;
 
 #[derive(Debug, Clone)]
 pub struct MetricsService<S> {
@@ -22,7 +25,6 @@ impl<S> MetricsService<S> {
     }
 }
 
-type ResultFuture<R, E> = Pin<Box<dyn Future<Output = Result<R, E>> + Send>>;
 impl<S, R> Service<R> for MetricsService<S>
 where
     S: Service<R> + Send,
@@ -86,3 +88,6 @@ impl<S> Layer<S> for MetricsLayer {
         }
     }
 }
+
+#[cfg(feature = "http")]
+pub mod http;
