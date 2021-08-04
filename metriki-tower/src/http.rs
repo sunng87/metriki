@@ -34,7 +34,7 @@ pub struct HyperMetricsService<S> {
 
 impl<S> Service<Request<Body>> for HyperMetricsService<S>
 where
-    S: Service<Request<Body>> + Send,
+    S: Service<Request<Body>, Response = Response<Body>> + Send,
     S::Future: Send + 'static,
 {
     type Response = Response<Body>;
@@ -47,7 +47,7 @@ where
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         let registry = self.registry.clone();
-        let name = self.base_metric_name.clone();
+        let name = Arc::new(self.base_metric_name.clone());
 
         let request_timer = registry.timer(&format!("{}.all", name));
         let method_timer = registry.timer(&format!("{}.{}", name, req.method().as_str()));
@@ -56,10 +56,14 @@ where
 
         registry.counter(&format!("{}.inflight", name)).inc(1);
 
+        // this is bad :(
+        let inner_registry_err = registry.clone();
+        let inner_name_err = name.clone();
+
         let f = self
             .inner
             .call(req)
-            .map(|resp| {
+            .map(move |resp| {
                 // timers
                 request_timer_ctx.stop();
                 method_timer_ctx.stop();
@@ -67,9 +71,9 @@ where
                 // inflight request counter
                 registry.counter(&format!("{}.inflight", name)).dec(1);
 
-                if let Ok(resp) = resp {
+                if let Ok(ref resp) = resp {
                     // meters by status code family, 2xx, 3xx, 4xx and 5xx
-                    let status_family = resp.status_code().as_u16() / 100;
+                    let status_family = resp.status().as_u16() / 100;
                     registry
                         .meter(&format!("{}.{}xx", name, status_family))
                         .mark();
@@ -79,10 +83,14 @@ where
             })
             .map_err(move |e| {
                 // error meter
-                registry.meter(&format!("{}.error", name)).mark();
+                inner_registry_err
+                    .meter(&format!("{}.error", inner_name_err))
+                    .mark();
 
                 // inflight request counter
-                registry.counter(&format!("{}.inflight", name)).dec(1);
+                inner_registry_err
+                    .counter(&format!("{}.inflight", inner_name_err))
+                    .dec(1);
 
                 e
             });
