@@ -70,6 +70,7 @@ where
 ///
 /// The timer name is provided with option `base_metric_name`, default to `requests`.
 /// The error meter is named as `{timer_name}.error`.
+///
 #[derive(Builder, Debug, Clone)]
 pub struct MetricsLayer {
     registry: Arc<MetricsRegistry>,
@@ -89,5 +90,6 @@ impl<S> Layer<S> for MetricsLayer {
     }
 }
 
+/// The `http` module provides tower service and layer designed for using with Hyper.
 #[cfg(feature = "http")]
 pub mod http;

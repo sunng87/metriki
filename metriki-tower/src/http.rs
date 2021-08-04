@@ -11,6 +11,16 @@ use tower_service::Service;
 
 use crate::common::ResultFuture;
 
+/// The Tower service designed for metering hyper stack
+///
+/// Current provided metrics:
+///
+/// * Timer all requests: `metric_name.all`
+/// * Timers by request method: eg, `metric_name.GET`
+/// * Meters by response status code family: eg, `metric_name.2xx`
+/// * Inflight request counter: `metric_name.inflight`
+/// * Meter for unhandled error: `metric_name.error`
+///
 #[derive(Debug, Clone)]
 pub struct HyperMetricsService<S> {
     registry: Arc<MetricsRegistry>,
@@ -18,6 +28,8 @@ pub struct HyperMetricsService<S> {
     inner: S,
 }
 
+// A sample data structure of hyper request
+//
 // Request {
 //     method: GET,
 //     uri: /,
@@ -32,12 +44,12 @@ pub struct HyperMetricsService<S> {
 //     ),
 // }
 
-impl<S> Service<Request<Body>> for HyperMetricsService<S>
+impl<S, RespBody> Service<Request<Body>> for HyperMetricsService<S>
 where
-    S: Service<Request<Body>, Response = Response<Body>> + Send,
+    S: Service<Request<Body>, Response = Response<RespBody>> + Send,
     S::Future: Send + 'static,
 {
-    type Response = Response<Body>;
+    type Response = Response<RespBody>;
     type Error = S::Error;
     type Future = ResultFuture<Self::Response, Self::Error>;
 
@@ -99,6 +111,9 @@ where
     }
 }
 
+/// Tower layer to create [`HyperMetricsService`]
+///
+/// Use [`HyperMetricsLayerBuilder`] to create.
 #[derive(Builder, Debug, Clone)]
 pub struct HyperMetricsLayer {
     registry: Arc<MetricsRegistry>,
