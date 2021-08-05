@@ -63,7 +63,7 @@ impl PrometheusExporter {
                 let metrics = self.registry.snapshots();
                 let metric_families: Vec<MetricFamily> = metrics
                     .iter()
-                    .map(|(ref key, metric)| match metric {
+                    .map(|(key, metric)| match metric {
                         Metric::Counter(c) => self.report_counter(key, c.as_ref()),
                         Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
                         Metric::Timer(t) => self.report_timer(key, t.as_ref()),
