@@ -48,6 +48,13 @@ impl LogReporter {
             name,
             meter.m15_rate()
         );
+        log!(
+            self.level,
+            "{}{}.count={}",
+            self.prefix,
+            name,
+            meter.count()
+        );
     }
 
     fn report_gauge(&self, name: &str, gauge: &Gauge) {
