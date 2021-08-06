@@ -1,6 +1,6 @@
 [package]
 name = "metriki-tower"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Metriki integration with tower"
