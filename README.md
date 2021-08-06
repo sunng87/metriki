@@ -38,9 +38,9 @@ InfluxDbReporterBuilder::default()
   - [x] prometheus [(doc)](https://docs.rs/metriki-prometheus-exporter/) [(crate)](https://crates.io/crates/metriki-promethes-exporter)
   - [x] statsd [(doc)](https://docs.rs/metriki-statsd-reporter/) [(crate)](https://crates.io/crates/metriki-statsd-reporter)
 - Instruments
-  - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp)
-  - [x] tower [(doc)](https://docs.rs/metriki-tower/) [(crate)](https://crates.io/crates/metriki-tower)
-  - [ ] reqwest
+  - [x] tower + hyper [(doc)](https://docs.rs/metriki-tower/) [(crate)](https://crates.io/crates/metriki-tower)
+  - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp).
+    Deprecated, use metriki-tower's http middleware instead.
 
 ## Concepts
 

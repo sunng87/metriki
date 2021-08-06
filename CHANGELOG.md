@@ -1,5 +1,18 @@
 # Change Log
 
+## Log Reporter [0.1.4] - 2021-08-06
+
+### Added
+
+* Output for `count` of meters.
+
+## Tower [0.2.0] - 2021-08-06
+
+### Added
+
+* New feature `http` provides middleware for metering Hyper app: the built-in metrics
+  includes timers by http request method, meters by response status code, etc.
+
 ## Tower [0.1.1] - 2021-08-01
 
 ### Fixed
