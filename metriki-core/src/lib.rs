@@ -1,3 +1,4 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
 //! # metriki-core
 //!
 //! Metriki-core is a metrics library that ported from Coda Hale's Dropwizard Metrics.

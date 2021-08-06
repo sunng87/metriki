@@ -1,3 +1,10 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+//! # Tower middleware for Metriki
+//!
+//! This library provide a generic tower middleware and a hyper-specific one to metering
+//! your tower apps.
+//!
+
 use std::sync::Arc;
 use std::task::{Context, Poll};
 
