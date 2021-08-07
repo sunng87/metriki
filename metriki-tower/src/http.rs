@@ -21,6 +21,7 @@ use crate::common::ResultFuture;
 /// * Inflight request counter: `metric_name.inflight`
 /// * Meter for unhandled error: `metric_name.error`
 ///
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[derive(Debug, Clone)]
 pub struct HyperMetricsService<S> {
     registry: Arc<MetricsRegistry>,
@@ -114,6 +115,7 @@ where
 /// Tower layer to create [`HyperMetricsService`]
 ///
 /// Use [`HyperMetricsLayerBuilder`] to create.
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[derive(Builder, Debug, Clone)]
 pub struct HyperMetricsLayer {
     registry: Arc<MetricsRegistry>,

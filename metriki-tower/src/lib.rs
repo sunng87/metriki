@@ -99,4 +99,5 @@ impl<S> Layer<S> for MetricsLayer {
 
 /// The `http` module provides tower service and layer designed for using with Hyper.
 #[cfg(feature = "http")]
+#[cfg_attr(docsrs, doc(cfg(feature = "http")))]
 pub mod http;

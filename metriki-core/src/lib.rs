@@ -102,4 +102,5 @@ pub use mset::MetricsSet;
 pub use registry::MetricsRegistry;
 
 #[cfg(feature = "macros")]
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 pub use metriki_macros::{metered, timed};
