@@ -21,30 +21,23 @@ impl MetricsSet for JemallocMetricsSet {
 
         epoch::advance().unwrap();
 
-        let active_gauge = Metric::gauge(Box::new(|| stats::active::read().unwrap() as f64)).into();
-        result.insert(format!("{}.jemalloc.active", self.prefix), active_gauge);
+        let active = Metric::gauge(Box::new(|| stats::active::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.active", self.prefix), active);
 
-        let allocated_gauge =
-            Metric::gauge(Box::new(|| stats::allocated::read().unwrap() as f64)).into();
-        result.insert(
-            format!("{}.jemalloc.allocated", self.prefix),
-            allocated_gauge,
-        );
+        let allocated = Metric::gauge(Box::new(|| stats::allocated::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.allocated", self.prefix), allocated);
 
-        let metadata_gauge =
-            Metric::gauge(Box::new(|| stats::metadata::read().unwrap() as f64)).into();
-        result.insert(format!("{}.jemalloc.metadata", self.prefix), metadata_gauge);
+        let metadata = Metric::gauge(Box::new(|| stats::metadata::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.metadata", self.prefix), metadata);
 
-        let mapped_gauge = Metric::gauge(Box::new(|| stats::mapped::read().unwrap() as f64)).into();
-        result.insert(format!("{}.jemalloc.mapped", self.prefix), mapped_gauge);
+        let mapped = Metric::gauge(Box::new(|| stats::mapped::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.mapped", self.prefix), mapped);
 
-        let resident_gauge =
-            Metric::gauge(Box::new(|| stats::resident::read().unwrap() as f64)).into();
-        result.insert(format!("{}.jemalloc.resident", self.prefix), resident_gauge);
+        let resident = Metric::gauge(Box::new(|| stats::resident::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.resident", self.prefix), resident);
 
-        let retained_gauge =
-            Metric::gauge(Box::new(|| stats::retained::read().unwrap() as f64)).into();
-        result.insert(format!("{}.jemalloc.retained", self.prefix), retained_gauge);
+        let retained = Metric::gauge(Box::new(|| stats::retained::read().unwrap() as f64)).into();
+        result.insert(format!("{}.jemalloc.retained", self.prefix), retained);
 
         result
     }
