@@ -9,6 +9,12 @@ pub struct JemallocMetricsSet {
     prefix: &'static str,
 }
 
+impl JemallocMetricsSet {
+    pub fn new(prefix: &'static str) -> JemallocMetricsSet {
+        JemallocMetricsSet { prefix }
+    }
+}
+
 impl MetricsSet for JemallocMetricsSet {
     fn get_all(&self) -> HashMap<String, Metric> {
         let mut result = HashMap::new();
