@@ -1,15 +1,37 @@
+//! # Metriki Jemalloc Instrumentation
+//!
+//! This library provide metrics of jemalloc memory allocator.
+//! The data is fetched from a library called `jemalloc-ctl`, and we are using the [tikv
+//! maintained version of it](https://github.com/tikv/jemallocator). It is recommended
+//! to use that version of jemallocator too.
+//!
+//! The instrumentation is provided as a `MetricsSet`. Use `MetricsRegistry::register_metrics_set` to add it to your metriki registry.
+//!
+//! [An example](https://github.com/sunng87/metriki/blob/master/metriki-jemalloc/examples/jemalloc.rs) can be found in our github repo.
+
 use std::collections::HashMap;
 
 use metriki_core::metrics::Metric;
 use metriki_core::MetricsSet;
 use tikv_jemalloc_ctl::{epoch, stats};
 
+/// The MetricsSet that provides gauges of jemalloc data.
+///
+/// Currently, the data is fetched from `jemalloc_ctl::stats`, including:
+///
+/// - `prefix.jemalloc.active`: bytes of active pages
+/// - `prefix.jemalloc.allocated`: total allocated bytes
+/// - `prefix.jemalloc.metadata`: jemalloc metadata bytes
+/// - `prefix.jemalloc.mapped`: bytes in active extents mapped by the allocator
+/// - `prefix.jemalloc.resident`: bytes in active extents mapped by the allocator
+/// - `prefix.jemalloc.retianed`: bytes in physically resident data pages mapped by the allocator.
 #[derive(Debug)]
 pub struct JemallocMetricsSet {
     prefix: &'static str,
 }
 
 impl JemallocMetricsSet {
+    /// Create a `JemallocMetricsSet` and specify a prefix for its metrics names.
     pub fn new(prefix: &'static str) -> JemallocMetricsSet {
         JemallocMetricsSet { prefix }
     }
