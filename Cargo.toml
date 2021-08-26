@@ -3,6 +3,7 @@
 [workspace]
 members = ["metriki-core",
            "metriki-influxdb-reporter",
+           "metriki-jemalloc",
            "metriki-log-reporter",
            "metriki-macros",
            "metriki-prometheus-exporter",
