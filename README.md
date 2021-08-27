@@ -1,8 +1,10 @@
 # Metriki
 
-Metriki is a rust library ported from [Dropwizard Metrics](https://github.com/dropwizard/metrics).
+Metriki is a rust library ported from [Dropwizard
+Metrics](https://github.com/dropwizard/metrics).
 
-Like Dropwizard Metrics, Metriki aggregates metrics on client-side and outputs limited amount data.
+Like Dropwizard Metrics, Metriki aggregates metrics on client-side and
+outputs limited amount data.
 
 ## Quick Start
 
@@ -38,9 +40,10 @@ InfluxDbReporterBuilder::default()
   - [x] prometheus [(doc)](https://docs.rs/metriki-prometheus-exporter/) [(crate)](https://crates.io/crates/metriki-promethes-exporter)
   - [x] statsd [(doc)](https://docs.rs/metriki-statsd-reporter/) [(crate)](https://crates.io/crates/metriki-statsd-reporter)
 - Instruments
+  - [x] jemalloc [(doc)](https://docs.rs/metriki-jemalloc/) [(crate)](https://crates.io/crates/metriki-jemalloc)
   - [x] tower + hyper [(doc)](https://docs.rs/metriki-tower/) [(crate)](https://crates.io/crates/metriki-tower)
   - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp).
-    Deprecated, use metriki-tower's http middleware instead.
+
 
 ## Concepts
 
@@ -58,16 +61,19 @@ An entrypoint and holder of all metrics.
 
 ### MetricsSet
 
-A trait to be implemented so that dynamic metrics can be added into registry. Metrics from the set
-are pulled into registry everytime when reporters and exporters pulling values from the registry.
+A trait to be implemented so that dynamic metrics can be added into
+registry. Metrics from the set are pulled into registry everytime when
+reporters and exporters pulling values from the registry.
 
 ### Reporter
 
-A component to report metric data periodically. Typically used for data sinks which has a push-model.
+A component to report metric data periodically. Typically used for
+data sinks which has a push-model.
 
 ### Exporter
 
-A component to expose metric data to external queriers. Typically for pull based data sinks.
+A component to expose metric data to external queriers. Typically for
+pull based data sinks.
 
 ## License
 
