@@ -1,5 +1,9 @@
 # Change Log
 
+## Jemalloc [0.1.0] - 2021-08-27
+
+Initial release of metriki-jemalloc intrumentation.
+
 ## Log Reporter [0.1.4] - 2021-08-06
 
 ### Added
