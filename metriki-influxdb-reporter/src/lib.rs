@@ -27,6 +27,8 @@ pub struct InfluxDbReporter {
     measurement_prefix: String,
     #[builder(default, setter)]
     tags: HashMap<String, String>,
+    #[builder(default = "50")]
+    batch_size: usize,
 }
 
 fn system_time_millis() -> u128 {
@@ -92,8 +94,14 @@ impl InfluxDbReporter {
 
     #[inline]
     fn do_query(&self, client: &Client, query: Vec<WriteQuery>) {
-        if let Err(e) = executor::block_on(client.query(&query)) {
-            warn!("Failed to write influxdb, {}", e)
+        // send query by chunk to avoid influxdb max request entity
+        // error
+        let chunks = query.chunks(self.batch_size);
+        for ch in chunks {
+            let batch = ch.to_owned();
+            if let Err(e) = executor::block_on(client.query(&batch)) {
+                warn!("Failed to write influxdb, {}", e)
+            }
         }
     }
 
