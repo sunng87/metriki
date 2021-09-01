@@ -1,5 +1,11 @@
 # Change Log
 
+## Influxdb Reporter [0.2.0] - 2021-09-01
+
+### Added
+
+* Added `batch_size` to limit influxdb batch writes, default to 50 rows.
+
 ## Jemalloc [0.1.0] - 2021-08-27
 
 Initial release of metriki-jemalloc intrumentation.
