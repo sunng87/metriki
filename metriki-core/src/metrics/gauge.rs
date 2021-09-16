@@ -5,20 +5,29 @@ use serde::ser::SerializeMap;
 #[cfg(feature = "ser")]
 use serde::{Serialize, Serializer};
 
-pub type GaugeFn = Box<dyn Fn() -> f64 + Send + Sync>;
+/// Trait for gauge impls
+pub trait GaugeProvider: Send + Sync {
+    fn value(&self) -> f64;
+}
+
+impl GaugeProvider for dyn Fn() -> f64 + Send + Sync {
+    fn value(&self) -> f64 {
+        self()
+    }
+}
 
 /// Gauges are used to measure the instantaneous value of something.
 pub struct Gauge {
-    func: GaugeFn,
+    func: Box<dyn GaugeProvider>,
 }
 
 impl Gauge {
-    pub(crate) fn new(f: GaugeFn) -> Gauge {
+    pub(crate) fn new(f: Box<dyn GaugeProvider>) -> Gauge {
         Gauge { func: f }
     }
 
     pub fn value(&self) -> f64 {
-        (*self.func)()
+        self.func.value()
     }
 }
 
