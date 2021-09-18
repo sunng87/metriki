@@ -166,7 +166,7 @@ impl MetricsRegistry {
     /// Register a `Gauge` with given function.
     ///
     /// The guage will return a value when any reporter wants to fetch data from it.
-    pub fn gauge(&self, name: &str, func: GaugeFn) {
+    pub fn gauge(&self, name: &str, func: Box<dyn GaugeFn>) {
         let mut inner = self.inner.write().unwrap();
         inner
             .metrics

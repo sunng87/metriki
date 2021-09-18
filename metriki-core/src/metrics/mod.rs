@@ -30,7 +30,7 @@ impl Metric {
     }
 
     /// Create gauge with given function
-    pub fn gauge(f: GaugeFn) -> Arc<Gauge> {
+    pub fn gauge(f: Box<dyn GaugeFn>) -> Arc<Gauge> {
         Gauge::new(f).into()
     }
 
