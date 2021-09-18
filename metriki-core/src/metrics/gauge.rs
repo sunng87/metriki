@@ -1,4 +1,6 @@
 use std::fmt;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
 #[cfg(feature = "ser")]
 use serde::ser::SerializeMap;
@@ -46,5 +48,33 @@ impl Serialize for Gauge {
         let mut map = serializer.serialize_map(Some(1))?;
         map.serialize_entry("value", &self.value())?;
         map.end()
+    }
+}
+
+struct Cache<V> {
+    expiry: Instant,
+    value: V,
+}
+
+pub struct CachedGauge {
+    func: Box<dyn GaugeFn>,
+    cache: Mutex<Option<Cache<f64>>>,
+    ttl: Duration,
+}
+
+impl CachedGauge {
+    pub fn new(func: Box<dyn GaugeFn>, ttl: Duration) -> CachedGauge {
+        CachedGauge {
+            func,
+            ttl,
+            cache: Mutex::new(None),
+        }
+    }
+}
+
+impl GaugeFn for CachedGauge {
+    fn value(&self) -> f64 {
+        // TODO:
+        0f64
     }
 }
