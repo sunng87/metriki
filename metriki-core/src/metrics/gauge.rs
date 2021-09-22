@@ -7,7 +7,7 @@ use serde::ser::SerializeMap;
 #[cfg(feature = "ser")]
 use serde::{Serialize, Serializer};
 
-/// Trait for gauge impls
+/// Gauge value source that returns `f64`.
 pub trait GaugeFn: Send + Sync {
     fn value(&self) -> f64;
 }
@@ -56,6 +56,19 @@ struct Cache<V> {
     value: V,
 }
 
+impl<V> Cache<V> {
+    fn expired(&self) -> bool {
+        self.expiry < Instant::now()
+    }
+
+    fn value(&self) -> &V {
+        &self.value
+    }
+}
+
+/// Gauge implementation that caches the result for given ttl.
+///
+/// This is designed for gauge functions that are expensive to call.
 pub struct CachedGauge {
     func: Box<dyn GaugeFn>,
     cache: Mutex<Option<Cache<f64>>>,
@@ -63,6 +76,7 @@ pub struct CachedGauge {
 }
 
 impl CachedGauge {
+    /// Create `CachedGauge` with gauge function and given ttl.
     pub fn new(func: Box<dyn GaugeFn>, ttl: Duration) -> CachedGauge {
         CachedGauge {
             func,
@@ -74,7 +88,22 @@ impl CachedGauge {
 
 impl GaugeFn for CachedGauge {
     fn value(&self) -> f64 {
-        // TODO:
-        0f64
+        let mut cache = self.cache.lock().unwrap();
+
+        if let Some(ref cache_inner) = *cache {
+            if !cache_inner.expired() {
+                return *cache_inner.value();
+            }
+        }
+
+        let value = self.func.value();
+        let new_cache = Cache {
+            expiry: Instant::now() + self.ttl,
+            value,
+        };
+
+        *cache = Some(new_cache);
+
+        value
     }
 }
