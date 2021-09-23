@@ -69,6 +69,17 @@ impl<V> Cache<V> {
 /// Gauge implementation that caches the result for given ttl.
 ///
 /// This is designed for gauge functions that are expensive to call.
+///
+/// ```
+/// # use std::time::Duration;
+/// # use metriki_core::global::global_registry;
+/// # use metriki_core::metrics::CachedGauge;
+///
+/// global_registry().gauge("gauge_name", CachedGauge::boxed(Box::new(||
+///     // gauge function that returns a value
+///     42f64
+/// ), Duration::from_secs(60)));
+/// ```
 pub struct CachedGauge {
     func: Box<dyn GaugeFn>,
     cache: Mutex<Option<Cache<f64>>>,
@@ -77,12 +88,12 @@ pub struct CachedGauge {
 
 impl CachedGauge {
     /// Create `CachedGauge` with gauge function and given ttl.
-    pub fn new(func: Box<dyn GaugeFn>, ttl: Duration) -> CachedGauge {
-        CachedGauge {
+    pub fn boxed(func: Box<dyn GaugeFn>, ttl: Duration) -> Box<CachedGauge> {
+        Box::new(CachedGauge {
             func,
             ttl,
             cache: Mutex::new(None),
-        }
+        })
     }
 }
 
