@@ -1,0 +1,19 @@
+[package]
+name = "metriki-tracing"
+version = "0.1.0"
+authors = ["Ning Sun <sunng@protonmail.com>"]
+edition = "2018"
+description = "Metriki as a subscriber of tracing"
+license = "MIT/Apache-2.0"
+keywords = ["observability", "metrics", "monitoring", "tracing"]
+homepage = "https://github.com/sunng87/metriki"
+repository = "https://github.com/sunng87/metriki"
+documentation = "https://docs.rs/metriki-tracing/"
+readme = "../README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tracing = "0.1"
+metriki-core = { path = "../metriki-core", version = "^1.0"}
+derive_builder = "0.9.0"

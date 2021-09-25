@@ -10,4 +10,5 @@ members = ["metriki-core",
            "metriki-riemann-reporter",
            "metriki-statsd-reporter",
            "metriki-tower",
+           "metriki-tracing",
            "metriki-warp"]
