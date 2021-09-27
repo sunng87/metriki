@@ -26,26 +26,34 @@ impl Subscriber for MetrikiSubscriber {
     }
 
     fn record(&self, _: &tracing::Id, _: &tracing::span::Record<'_>) {
-        todo!()
+        // do nothing
     }
-    fn record_follows_from(&self, _: &tracing::Id, _: &tracing::Id) {
-        todo!()
-    }
-    fn event(&self, _: &tracing::Event<'_>) {
-        todo!()
-    }
-    fn enter(&self, _: &tracing::Id) {
-        todo!()
-    }
-    fn exit(&self, _: &tracing::Id) {
-        todo!()
-    }
-}
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn record_follows_from(&self, _: &tracing::Id, _: &tracing::Id) {
+        // do nothing
+    }
+
+    fn event(&self, event: &tracing::Event<'_>) {
+        // register event as meter
+        self.registry.meter(event.metadata().name()).mark();
+    }
+
+    fn enter(&self, span_id: &tracing::Id) {
+        let span = self.current_span();
+        if let Some(metadata) = span.metadata() {
+            let name = metadata.name();
+            let timer = self.registry.timer(name);
+            let timer_ctx = TimerContextArc::start(timer);
+
+            let mut timer_purgator = self.active_timers.lock().unwrap();
+            timer_purgator.insert(span_id.clone(), timer_ctx);
+        }
+    }
+
+    fn exit(&self, span_id: &tracing::Id) {
+        let mut timer_purgator = self.active_timers.lock().unwrap();
+        if let Some(timer_ctx) = timer_purgator.remove(span_id) {
+            timer_ctx.stop();
+        }
     }
 }
