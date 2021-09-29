@@ -49,7 +49,7 @@ impl TimerContextArc {
     }
 
     /// Stop the timer context.
-    pub fn stop(self) {
+    pub fn stop(&self) {
         let elapsed = Instant::now() - self.start_at;
         let elapsed_ms = elapsed.as_millis();
 
