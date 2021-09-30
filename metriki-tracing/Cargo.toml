@@ -18,3 +18,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.2", default-features = false, features = ["registry"] }
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 derive_builder = "0.9.0"
+
+[dev-dependencies]
+metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.1" }
+env_logger = "0.8"
