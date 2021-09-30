@@ -48,8 +48,6 @@ where
 impl MetrikiLayer {
     // Create `MetrikiLayer` from a Metriki MetricsRegistry
     pub fn new(registry: Arc<MetricsRegistry>) -> MetrikiLayer {
-        MetrikiLayer {
-            registry: registry.clone(),
-        }
+        MetrikiLayer { registry }
     }
 }
