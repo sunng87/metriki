@@ -46,7 +46,7 @@ where
 }
 
 impl MetrikiLayer {
-    // Create `MetrikiSubscriber` with default settings
+    // Create `MetrikiLayer` from a Metriki MetricsRegistry
     pub fn new(registry: Arc<MetricsRegistry>) -> MetrikiLayer {
         MetrikiLayer {
             registry: registry.clone(),
