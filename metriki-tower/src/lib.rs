@@ -54,7 +54,7 @@ where
         let f = self
             .inner
             .call(req)
-            .map(|resp| {
+            .map(move |resp| {
                 timer_ctx.stop();
                 resp
             })
