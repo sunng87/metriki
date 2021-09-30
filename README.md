@@ -40,9 +40,18 @@ InfluxDbReporterBuilder::default()
   - [x] prometheus [(doc)](https://docs.rs/metriki-prometheus-exporter/) [(crate)](https://crates.io/crates/metriki-promethes-exporter)
   - [x] statsd [(doc)](https://docs.rs/metriki-statsd-reporter/) [(crate)](https://crates.io/crates/metriki-statsd-reporter)
 - Instruments
-  - [x] jemalloc [(doc)](https://docs.rs/metriki-jemalloc/) [(crate)](https://crates.io/crates/metriki-jemalloc)
-  - [x] tower + hyper [(doc)](https://docs.rs/metriki-tower/) [(crate)](https://crates.io/crates/metriki-tower)
-  - [x] warp [(doc)](https://docs.rs/metriki-warp/) [(crate)](https://crates.io/crates/metriki-warp).
+  - [x] jemalloc: tracking jemalloc stats
+        [(doc)](https://docs.rs/metriki-jemalloc/)
+        [(crate)](https://crates.io/crates/metriki-jemalloc).
+  - [x] tracing: tracing subscriber layer
+        [(doc)](https://docs.rs/metriki-tracing/)
+        [(crate)](https://crates.io/crates/metriki-tracing).
+  - [x] tower + hyper: tower layer for metriki integration
+        [(doc)](https://docs.rs/metriki-tower/)
+        [(crate)](https://crates.io/crates/metriki-tower).
+  - [x] warp: warp middleware to inject metriki `MetricsRegistry`
+        [(doc)](https://docs.rs/metriki-warp/)
+        [(crate)](https://crates.io/crates/metriki-warp).
 
 
 ## Concepts
