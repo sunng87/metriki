@@ -1,5 +1,28 @@
 # Change Log
 
+## Tower [0.2.5] - 2021-10-03
+
+### Changed
+
+* Adopt metriki-core 1.7 changes.
+
+## Tracing [0.1.0] - 2021-10-03
+
+Initial release.
+
+## Core [1.7.0] - 2021-10-03
+
+### Added
+
+* Added new built-in types `CacahedGauge`.
+
+### Changed
+
+* `GaugeFn` is now a trait instead of type alias in previous
+  releases. This allows better extensibility for gauge
+  implementations.
+* `TimerContextArc::stop` will not require an owned `self`.
+
 ## Influxdb Reporter [0.2.0] - 2021-09-01
 
 ### Added
