@@ -1,6 +1,6 @@
 [package]
 name = "metriki-core"
-version = "1.6.2"
+version = "1.7.0"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "A metrics library ported from dropwizard metrics"
