@@ -17,7 +17,7 @@ pub struct StatsdReporter {
     registry: Arc<MetricsRegistry>,
     #[builder(setter(into))]
     host: String,
-    #[builder(setter, default = cadence::DEFAULT_PORT)]
+    #[builder(setter, default = "cadence::DEFAULT_PORT")]
     port: u16,
     #[builder(default = "30")]
     interval_secs: u64,
