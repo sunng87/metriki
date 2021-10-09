@@ -1,0 +1,20 @@
+[package]
+name = "metriki-r2d2"
+version = "0.1.0"
+edition = "2018"
+description = "Metriki instrumentation for r2d2 connection pool"
+license = "MIT/Apache-2.0"
+keywords = ["observability", "metrics", "monitoring"]
+homepage = "https://github.com/sunng87/metriki"
+repository = "https://github.com/sunng87/metriki"
+documentation = "https://docs.rs/metriki-r2d2/"
+readme = "../README.md"
+
+[dependencies]
+metriki-core = { path = "../metriki-core", version = "^1.7"}
+r2d2 = "0.8"
+derive_builder = "0.10"
+
+[dev-dependencies]
+metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.1" }
+env_logger = "0.9"

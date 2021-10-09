@@ -1,0 +1,57 @@
+//! # Metriki Instrumentation for R2D2
+//!
+//! This library provides extensions for r2d2, which is generic
+//! database connection pool library, to measure performance for
+//! database applications.
+//!
+//! It provides following metriki metrics:
+//!
+//! * `r2d2.checkout`: A meter records the rate of your application
+//! borrowing connection from the pool
+//! * `r2d2.wait`: A histogram summarizes the distribution of time
+//! spent on borrowing connection from the pool
+//! * `r2d2.timeout`: A meter records the error rate of timeout
+//! borrowing connection
+//! * `r2d2.usage`: A histogram summarizes the distribution of time
+//! for using the connection. Typically this is the time spent to
+//! query your database.
+//!
+use std::sync::Arc;
+
+use derive_builder::Builder;
+use r2d2::event::{CheckinEvent, CheckoutEvent, TimeoutEvent};
+use r2d2::HandleEvent;
+
+use metriki_core::MetricsRegistry;
+
+// The r2d2 EventHandler that tracks usage of the database connection
+// and its connection pool.
+#[derive(Debug, Builder)]
+pub struct MetrikiHandler {
+    registry: Arc<MetricsRegistry>,
+    #[builder(setter(into), default = "\"r2d2\".to_owned()")]
+    name: String,
+}
+
+impl HandleEvent for MetrikiHandler {
+    fn handle_checkout(&self, event: CheckoutEvent) {
+        self.registry
+            .meter(&format!("{}.checkout", self.name))
+            .mark();
+        self.registry
+            .histogram(&format!("{}.wait", self.name))
+            .update(event.duration().as_millis() as u64);
+    }
+
+    fn handle_timeout(&self, _event: TimeoutEvent) {
+        self.registry
+            .meter(&format!("{}.timeout", self.name))
+            .mark();
+    }
+
+    fn handle_checkin(&self, event: CheckinEvent) {
+        self.registry
+            .histogram(&format!("{}.usage", self.name))
+            .update(event.duration().as_millis() as u64);
+    }
+}
