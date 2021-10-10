@@ -16,6 +16,26 @@
 //! for using the connection. Typically this is the time spent to
 //! query your database.
 //!
+//! ## Usage
+//!
+//! Add MetrikiHandler as `r2d2::Builder`
+//!
+//! ```rust,ignore
+//! // Create metriki event handler from metriki global registry
+//! let metriki_handler = MetrikiHandlerBuilder::default()
+//!     .registry(global_registry())
+//!     .build()
+//!     .unwrap();
+//!
+//! let manager = r2d2_foodb::FooConnectionManager::new("localhost:1234");
+//! let pool = r2d2::Pool::builder()
+//!     .max_size(15)
+//!     // set event handler to the builder
+//!     .event_handler(Box::new(metriki_handler))
+//!     .build(manager)
+//!     .unwrap();
+//! ```
+//!
 use std::sync::Arc;
 
 use derive_builder::Builder;
