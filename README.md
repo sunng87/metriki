@@ -52,6 +52,9 @@ InfluxDbReporterBuilder::default()
   - [x] warp: warp middleware to inject metriki `MetricsRegistry`
         [(doc)](https://docs.rs/metriki-warp/)
         [(crate)](https://crates.io/crates/metriki-warp).
+  - [x] r2d2: monitoring database connection usage
+        [(doc)](https://docs.rs/metriki-r2d2/)
+        [(crate)](https://crates.io/crates/metriki-r2d2).
 
 
 ## Concepts
