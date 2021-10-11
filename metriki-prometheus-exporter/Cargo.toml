@@ -13,7 +13,7 @@ documentation = "https://docs.rs/metriki-prometheus-exporter/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-prometheus = "0.12"
+prometheus = "0.13"
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 derive_builder = "0.10.2"
 log = "0.4"
