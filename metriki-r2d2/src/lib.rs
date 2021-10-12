@@ -39,8 +39,17 @@
 use std::sync::Arc;
 
 use derive_builder::Builder;
-use r2d2::event::{CheckinEvent, CheckoutEvent, TimeoutEvent};
-use r2d2::HandleEvent;
+#[cfg(not(feature = "diesel"))]
+use r2d2::{
+    event::{CheckinEvent, CheckoutEvent, TimeoutEvent},
+    HandleEvent,
+};
+
+#[cfg(feature = "diesel")]
+use diesel::r2d2::{
+    event::{CheckinEvent, CheckoutEvent, TimeoutEvent},
+    HandleEvent,
+};
 
 use metriki_core::MetricsRegistry;
 
