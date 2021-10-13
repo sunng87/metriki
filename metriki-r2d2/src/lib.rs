@@ -1,4 +1,4 @@
-//! # Metriki Instrumentation for R2D2
+//! # Metriki Instrumentation for r2d2
 //!
 //! This library provides extensions for r2d2, which is generic
 //! database connection pool library, to measure performance for
@@ -36,11 +36,32 @@
 //!     .unwrap();
 //! ```
 //!
+//! ## diesel Support
+//!
+//! The Rust ORM library diesel has an re-exported version of r2d2. By
+//! enabling `diesel` feature of `metriki-r2d2`, it will work with the
+//! diesel variant.
+//!
+//! ## Customization
+//!
+//! The metric name prefix `r2d2` can be customized with
+//! `MetrikiHandlerBuilder` by setting `name`. This is required when
+//! you have multiple r2d2 pools in your application.
+//!
 use std::sync::Arc;
 
 use derive_builder::Builder;
-use r2d2::event::{CheckinEvent, CheckoutEvent, TimeoutEvent};
-use r2d2::HandleEvent;
+#[cfg(not(feature = "diesel"))]
+use r2d2::{
+    event::{CheckinEvent, CheckoutEvent, TimeoutEvent},
+    HandleEvent,
+};
+
+#[cfg(feature = "diesel")]
+use diesel::r2d2::{
+    event::{CheckinEvent, CheckoutEvent, TimeoutEvent},
+    HandleEvent,
+};
 
 use metriki_core::MetricsRegistry;
 
