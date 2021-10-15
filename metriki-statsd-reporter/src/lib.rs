@@ -82,7 +82,7 @@ impl StatsdReporter {
 
     fn report_gauge(&self, name: &str, gauge: &Gauge, client: &StatsdClient) {
         let value = gauge.value();
-        self.send(client.gauge_f64_with_tags(name, value));
+        self.send(client.gauge_with_tags(name, value));
     }
 
     fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot, client: &StatsdClient) {
