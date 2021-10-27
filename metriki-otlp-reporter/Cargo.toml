@@ -1,0 +1,16 @@
+[package]
+name = "metriki-otlp-reporter"
+version = "0.1.0"
+edition = "2021"
+description = "OpenTelemetry OTLP reporter for metriki"
+license = "MIT/Apache-2.0"
+keywords = ["observability", "metrics", "monitoring", "opentelemetry", "otlp"]
+homepage = "https://github.com/sunng87/metriki"
+repository = "https://github.com/sunng87/metriki"
+documentation = "https://docs.rs/metriki-otlp-reporter/"
+readme = "../README.md"
+
+[dependencies]
+metriki-core = { path = "../metriki-core", version = "^1.0"}
+derive_builder = "0.10.2"
+tonic = "0.6.1"
