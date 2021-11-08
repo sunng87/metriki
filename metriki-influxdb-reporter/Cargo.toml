@@ -1,6 +1,6 @@
 [package]
 name = "metriki-influxdb-reporter"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Influxdb reporter for metriki"
@@ -20,4 +20,4 @@ influxdb = "0.5"
 derive_builder = "0.10.2"
 futures = { version = "0.3", features = ["executor"] }
 log = "0.4"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.0", default-features = false, features = ["net", "time"] }
