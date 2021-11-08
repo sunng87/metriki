@@ -1,6 +1,6 @@
 [package]
 name = "metriki-influxdb-reporter"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "Influxdb reporter for metriki"
@@ -10,12 +10,14 @@ homepage = "https://github.com/sunng87/metriki"
 repository = "https://github.com/sunng87/metriki"
 documentation = "https://docs.rs/metriki-influxdb-reporter/"
 readme = "../README.md"
+resolver = "2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-metriki-core = { path = "../metriki-core", version = "^1.0"}
-influxdb = { version = "0.5", features = ["h1-client-rustls"], default-features = false }
+metriki-core = { path = "../metriki-core", version = "^1.0" }
+influxdb = "0.5"
 derive_builder = "0.10.2"
-futures = { version = "0.3", features = ["executor"]}
+futures = { version = "0.3", features = ["executor"] }
 log = "0.4"
+tokio = { version = "1.0", default-features = false, features = ["net", "time"] }
