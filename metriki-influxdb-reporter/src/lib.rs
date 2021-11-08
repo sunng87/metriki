@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use derive_builder::Builder;
-use futures::executor;
 use influxdb::{Client, InfluxDbWriteable, Timestamp, WriteQuery};
+
 use log::warn;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
+use tokio::time::{sleep, Duration};
 
 #[derive(Builder, Debug)]
 pub struct InfluxDbReporter {
@@ -50,29 +50,35 @@ impl InfluxDbReporter {
     }
 
     pub fn start(self) {
-        let looper = move || loop {
-            let metrics = self.registry.snapshots();
-            let client = self.new_client();
+        let looper = move || {
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .expect("can not create tokio runtime");
+            runtime.block_on(async {
+                loop {
+                    let metrics = self.registry.snapshots();
+                    let client = self.new_client();
+                    let queries: Vec<WriteQuery> = metrics
+                        .iter()
+                        .map(|(key, metric)| match metric {
+                            Metric::Counter(c) => self.report_counter(key, c.as_ref()),
+                            Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
+                            Metric::Timer(t) => self.report_timer(key, t.as_ref()),
+                            Metric::Meter(m) => self.report_meter(key, m.as_ref()),
+                            Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()),
+                        })
+                        .collect();
 
-            let queries: Vec<WriteQuery> = metrics
-                .iter()
-                .map(|(key, metric)| match metric {
-                    Metric::Counter(c) => self.report_counter(key, c.as_ref()),
-                    Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
-                    Metric::Timer(t) => self.report_timer(key, t.as_ref()),
-                    Metric::Meter(m) => self.report_meter(key, m.as_ref()),
-                    Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()),
-                })
-                .collect();
+                    if !queries.is_empty() {
+                        self.do_query(&client, queries).await;
+                    }
 
-            if !queries.is_empty() {
-                self.do_query(&client, queries);
-            }
-
-            thread::sleep(Duration::from_secs(self.interval_secs));
+                    sleep(Duration::from_secs(self.interval_secs)).await;
+                }
+            })
         };
-
-        thread::spawn(looper);
+        std::thread::spawn(looper);
     }
 
     #[inline]
@@ -93,13 +99,13 @@ impl InfluxDbReporter {
     }
 
     #[inline]
-    fn do_query(&self, client: &Client, query: Vec<WriteQuery>) {
+    async fn do_query(&self, client: &Client, query: Vec<WriteQuery>) {
         // send query by chunk to avoid influxdb max request entity
         // error
         let chunks = query.chunks(self.batch_size);
         for ch in chunks {
             let batch = ch.to_owned();
-            if let Err(e) = executor::block_on(client.query(&batch)) {
+            if let Err(e) = client.query(batch).await {
                 warn!("Failed to write influxdb, {}", e)
             }
         }
