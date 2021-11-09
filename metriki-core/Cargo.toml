@@ -13,7 +13,7 @@ readme = "../README.md"
 
 [dependencies]
 crossbeam-utils = "0.8"
-hdrhistogram = "7"
+hdrhistogram = { version = "7", default-features = false, features = [] }
 lazy_static = "1"
 
 # optionals
