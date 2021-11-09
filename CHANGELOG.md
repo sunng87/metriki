@@ -1,5 +1,18 @@
 # Change Log
 
+## Core [1.7.1] - 2021-11-09
+
+### Changed
+
+* Disabled unused features of Hdrhistogram crate.
+
+## Influxdb [0.3.0] - 2021-11-09
+
+### Changed
+
+* Update influxdb crate to 0.5.
+* Use Tokio/Hyper/Reqwest backend as http client.
+
 ## Tower [0.2.5] - 2021-10-03
 
 ### Changed
