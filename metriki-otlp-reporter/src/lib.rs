@@ -34,7 +34,22 @@ pub mod opentelemetry {
     }
 }
 
+use opentelemetry::proto::collector::metrics::v1::{
+    metrics_service_client::MetricsServiceClient, ExportMetricsServiceRequest,
+    ExportMetricsServiceResponse,
+};
+
 #[derive(Builder, Debug)]
-pub struct InfluxDbReporter {
+pub struct OtlpReporter {
     registry: Arc<MetricsRegistry>,
+    url: String,
+}
+
+impl OtlpReporter {
+    async fn start(&self) {
+        let mut client = MetricsServiceClient::connect(self.url.clone());
+
+        let request = tonic::Request::new(ExportMetricsServiceRequest::new());
+        let response = client.export(request).await?;
+    }
 }
