@@ -15,6 +15,7 @@ metriki-core = { path = "../metriki-core", version = "^1.0"}
 derive_builder = "0.10"
 tonic = "0.6"
 prost = "0.9"
+tokio = { version = "1", features = ["rt"] }
 
 [build-dependencies]
 tonic-build = {version = "0.6", features = ["prost", "compression"]}
