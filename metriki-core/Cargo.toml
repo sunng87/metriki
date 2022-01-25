@@ -1,6 +1,6 @@
 [package]
 name = "metriki-core"
-version = "1.7.1"
+version = "1.7.2"
 authors = ["Ning Sun <sunng@protonmail.com>"]
 edition = "2018"
 description = "A metrics library ported from dropwizard metrics"
@@ -15,6 +15,7 @@ readme = "../README.md"
 crossbeam-utils = "0.8"
 hdrhistogram = { version = "7", default-features = false, features = [] }
 lazy_static = "1"
+dashmap = "5.0"
 
 # optionals
 ## serialization

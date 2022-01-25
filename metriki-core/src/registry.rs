@@ -1,6 +1,7 @@
+use dashmap::DashMap;
 use std::collections::HashMap;
 use std::fmt::{self, Debug, Formatter};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 #[cfg(feature = "ser")]
 use serde::ser::SerializeMap;
@@ -15,7 +16,7 @@ use crate::mset::MetricsSet;
 ///
 #[derive(Default)]
 pub struct MetricsRegistry {
-    inner: Arc<RwLock<Inner>>,
+    inner: Arc<Inner>,
     filter: Option<Box<dyn MetricsFilter + 'static>>,
 }
 
@@ -29,8 +30,8 @@ impl Debug for MetricsRegistry {
 
 #[derive(Default, Debug)]
 struct Inner {
-    metrics: HashMap<String, Metric>,
-    mset: HashMap<String, Arc<dyn MetricsSet + 'static>>,
+    metrics: DashMap<String, Metric>,
+    mset: DashMap<String, Arc<dyn MetricsSet + 'static>>,
 }
 
 impl MetricsRegistry {
@@ -54,20 +55,23 @@ impl MetricsRegistry {
     /// This function may panic if a metric is already registered with type other than meter.
     pub fn meter(&self, name: &str) -> Arc<Meter> {
         let meter = {
-            let inner = self.inner.read().unwrap();
-
-            inner.metrics.get(name).map(|metric| match metric {
-                Metric::Meter(ref m) => m.clone(),
-                _ => panic!("A metric with same name and different type is already registered."),
-            })
+            self.inner
+                .metrics
+                .get(name)
+                .as_deref()
+                .map(|metric| match metric {
+                    Metric::Meter(ref m) => m.clone(),
+                    _ => {
+                        panic!("A metric with same name and different type is already registered.")
+                    }
+                })
         };
 
         if let Some(m) = meter {
             m
         } else {
-            let mut inner_write = self.inner.write().unwrap();
             let meter = Arc::new(Meter::new());
-            inner_write
+            self.inner
                 .metrics
                 .insert(name.to_owned(), Metric::Meter(meter.clone()));
             meter
@@ -84,20 +88,23 @@ impl MetricsRegistry {
     /// This function may panic if a metric is already registered with type other than histogram.
     pub fn histogram(&self, name: &str) -> Arc<Histogram> {
         let histo = {
-            let inner = self.inner.read().unwrap();
-
-            inner.metrics.get(name).map(|metric| match metric {
-                Metric::Histogram(ref m) => m.clone(),
-                _ => panic!("A metric with same name and different type is already registered."),
-            })
+            self.inner
+                .metrics
+                .get(name)
+                .as_deref()
+                .map(|metric| match metric {
+                    Metric::Histogram(ref m) => m.clone(),
+                    _ => {
+                        panic!("A metric with same name and different type is already registered.")
+                    }
+                })
         };
 
         if let Some(m) = histo {
             m
         } else {
-            let mut inner_write = self.inner.write().unwrap();
             let histo = Arc::new(Histogram::new());
-            inner_write
+            self.inner
                 .metrics
                 .insert(name.to_owned(), Metric::Histogram(histo.clone()));
             histo
@@ -113,20 +120,23 @@ impl MetricsRegistry {
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn counter(&self, name: &str) -> Arc<Counter> {
         let counter = {
-            let inner = self.inner.read().unwrap();
-
-            inner.metrics.get(name).map(|metric| match metric {
-                Metric::Counter(ref m) => m.clone(),
-                _ => panic!("A metric with same name and different type is already registered."),
-            })
+            self.inner
+                .metrics
+                .get(name)
+                .as_deref()
+                .map(|metric| match metric {
+                    Metric::Counter(ref m) => m.clone(),
+                    _ => {
+                        panic!("A metric with same name and different type is already registered.")
+                    }
+                })
         };
 
         if let Some(m) = counter {
             m
         } else {
-            let mut inner_write = self.inner.write().unwrap();
             let counter = Arc::new(Counter::new());
-            inner_write
+            self.inner
                 .metrics
                 .insert(name.to_owned(), Metric::Counter(counter.clone()));
             counter
@@ -143,20 +153,23 @@ impl MetricsRegistry {
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn timer(&self, name: &str) -> Arc<Timer> {
         let timer = {
-            let inner = self.inner.read().unwrap();
-
-            inner.metrics.get(name).map(|metric| match metric {
-                Metric::Timer(ref m) => m.clone(),
-                _ => panic!("A metric with same name and different type is already registered."),
-            })
+            self.inner
+                .metrics
+                .get(name)
+                .as_deref()
+                .map(|metric| match metric {
+                    Metric::Timer(ref m) => m.clone(),
+                    _ => {
+                        panic!("A metric with same name and different type is already registered.")
+                    }
+                })
         };
 
         if let Some(m) = timer {
             m
         } else {
-            let mut inner_write = self.inner.write().unwrap();
             let timer = Arc::new(Timer::new());
-            inner_write
+            self.inner
                 .metrics
                 .insert(name.to_owned(), Metric::Timer(timer.clone()));
             timer
@@ -167,8 +180,7 @@ impl MetricsRegistry {
     ///
     /// The guage will return a value when any reporter wants to fetch data from it.
     pub fn gauge(&self, name: &str, func: Box<dyn GaugeFn>) {
-        let mut inner = self.inner.write().unwrap();
-        inner
+        self.inner
             .metrics
             .insert(name.to_owned(), Metric::Gauge(Arc::new(Gauge::new(func))));
     }
@@ -178,21 +190,21 @@ impl MetricsRegistry {
     ///
     /// This is useful for reporters to fetch all values from the registry.
     pub fn snapshots(&self) -> HashMap<String, Metric> {
-        let inner = self.inner.read().unwrap();
         let filter = self.filter.as_ref();
+        let mut results: HashMap<String, Metric> = HashMap::new();
 
-        let mut results = HashMap::new();
-
-        for (k, v) in inner.metrics.iter() {
+        let metrics = self.inner.metrics.clone();
+        for (k, v) in metrics.into_read_only().iter() {
             if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
-                results.insert(k.to_owned(), v.clone());
+                results.insert(k.to_string(), v.clone());
             }
         }
-        for metrics_set in inner.mset.values() {
+        let mset = self.inner.mset.clone();
+        for metrics_set in mset.into_read_only().values() {
             let metrics = metrics_set.get_all();
             for (k, v) in metrics.iter() {
                 if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
-                    results.insert(k.to_owned(), v.clone());
+                    results.insert(k.clone(), v.clone());
                 }
             }
         }
@@ -216,14 +228,12 @@ impl MetricsRegistry {
     /// The name has nothing to do with metrics it added to `snapshots()` results.
     /// It's just for identify the metrics set for dedup and removal.
     pub fn register_metrics_set(&self, name: &str, mset: Arc<dyn MetricsSet + 'static>) {
-        let mut inner = self.inner.write().unwrap();
-        inner.mset.insert(name.to_owned(), mset);
+        self.inner.mset.insert(name.to_owned(), mset);
     }
 
     /// Unregister a MetricsSet implementation by its name.
     pub fn unregister_metrics_set(&self, name: &str) {
-        let mut inner = self.inner.write().unwrap();
-        inner.mset.remove(name);
+        self.inner.mset.remove(name);
     }
 }
 
