@@ -1,5 +1,11 @@
 # Change Log
 
+## Core [1.7.2] - 2022-01-26
+
+### Changed
+
+* Use dashmap to improvement scalability in multithread scenarios [#62]
+
 ## Core [1.7.1] - 2021-11-09
 
 ### Changed
