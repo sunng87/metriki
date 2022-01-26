@@ -3,6 +3,7 @@ extern crate test;
 
 use rand;
 use test::Bencher;
+use threadpool::ThreadPool;
 
 use metriki_core::MetricsRegistry;
 
@@ -31,5 +32,22 @@ fn bench_timer(b: &mut Bencher) {
         let timer = rg.timer("test.timer");
         let ctx = timer.start();
         ctx.stop();
+    });
+}
+
+#[bench]
+fn bench_multithread(b: &mut Bencher) {
+    let pool = ThreadPool::new(16);
+
+    b.iter(|| {
+        let rg = MetricsRegistry::arc();
+        for _ in 0..1000 {
+            let rg2 = rg.clone();
+            pool.execute(move || {
+                let name = format!("test.meter.{}", (rand::random::<f64>() * 100.0) as u64);
+                rg2.meter(&name).mark();
+            });
+        }
+        pool.join();
     });
 }
