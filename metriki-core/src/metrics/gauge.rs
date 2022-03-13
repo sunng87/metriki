@@ -118,3 +118,12 @@ impl GaugeFn for CachedGauge {
         value
     }
 }
+
+/// A Gauge that holds a constant value
+pub struct StaticGauge(pub f64);
+
+impl GaugeFn for StaticGauge {
+    fn value(&self) -> f64 {
+        self.0
+    }
+}
