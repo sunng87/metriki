@@ -132,7 +132,7 @@ impl Serialize for Metric {
 }
 
 pub use counter::Counter;
-pub use gauge::{CachedGauge, Gauge, GaugeFn, ValueGauge};
+pub use gauge::{CachedGauge, Gauge, GaugeFn, StaticGauge};
 pub use histogram::{Histogram, HistogramSnapshot};
 pub use meter::Meter;
 pub use timer::{Timer, TimerContext, TimerContextArc};
