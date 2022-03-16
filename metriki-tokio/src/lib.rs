@@ -70,12 +70,24 @@ impl MetricsSet for TokioTaskMetricsSet {
 
 /// A MetricsSet works with tokio_metrics `TaskMonitor`.
 ///
+#[cfg(feature = "rt")]
 #[derive(Builder)]
 pub struct TokioRuntimeMetricsSet {
     name: String,
-    monitor: Arc<Mutex<Box<dyn Iterator<Item = RuntimeMetrics>>>>,
+    monitor: Arc<Mutex<dyn Iterator<Item = RuntimeMetrics> + Send>>,
 }
 
+#[cfg(feature = "rt")]
+impl TokioRuntimeMetricsSet {
+    pub fn new(runtime_monitor: RuntimeMonitor) -> TokioRuntimeMetricsSet {
+        TokioRuntimeMetricsSet {
+            name: "default".to_owned(),
+            monitor: Arc::new(Mutex::new(runtime_monitor.intervals())),
+        }
+    }
+}
+
+#[cfg(feature = "rt")]
 impl fmt::Debug for TokioRuntimeMetricsSet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         f.debug_struct("TokioRuntimeMetricsSet")
@@ -84,10 +96,10 @@ impl fmt::Debug for TokioRuntimeMetricsSet {
     }
 }
 
+#[cfg(feature = "rt")]
 impl MetricsSet for TokioRuntimeMetricsSet {
     fn get_all(&self) -> HashMap<String, Metric> {
-        // TODO: change to intervals
-        let metrics: RuntimeMetrics = self.monitor.lock().unwrap().next();
+        let metrics: RuntimeMetrics = self.monitor.lock().unwrap().next().unwrap();
 
         let mut result = HashMap::new();
         result.insert(
