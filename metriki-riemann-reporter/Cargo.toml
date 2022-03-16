@@ -15,7 +15,7 @@ documentation = "https://docs.rs/metriki-riemann-reporter/"
 [dependencies]
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 rustmann = "0.7"
-derive_builder = "0.10.2"
+derive_builder = "0.11.0"
 log = "0.4"
 hostname = "0.3"
 lazy_static = "1"
