@@ -12,6 +12,7 @@ use tokio_metrics::{RuntimeMetrics, RuntimeMonitor, TaskMetrics, TaskMonitor};
 ///
 #[derive(Builder)]
 pub struct TokioTaskMetricsSet {
+    #[builder(setter(into))]
     name: String,
     #[builder(setter(custom))]
     monitor: Arc<Mutex<dyn Iterator<Item = TaskMetrics> + Send>>,
@@ -87,6 +88,7 @@ impl MetricsSet for TokioTaskMetricsSet {
 #[cfg(feature = "rt")]
 #[derive(Builder)]
 pub struct TokioRuntimeMetricsSet {
+    #[builder(setter(into))]
     name: String,
     #[builder(setter(custom))]
     monitor: Arc<Mutex<dyn Iterator<Item = RuntimeMetrics> + Send>>,
@@ -106,6 +108,13 @@ impl fmt::Debug for TokioRuntimeMetricsSet {
         f.debug_struct("TokioRuntimeMetricsSet")
             .field("name", &self.name)
             .finish()
+    }
+}
+
+#[cfg(feature = "rt")]
+impl TokioRuntimeMetricsSet {
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
 
