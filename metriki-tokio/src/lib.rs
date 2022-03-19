@@ -13,7 +13,8 @@ use tokio_metrics::{RuntimeMetrics, RuntimeMonitor, TaskMetrics, TaskMonitor};
 #[derive(Builder)]
 pub struct TokioTaskMetricsSet {
     name: String,
-    monitor: Arc<TaskMonitor>,
+    #[builder(setter(custom))]
+    monitor: Arc<Mutex<dyn Iterator<Item = TaskMetrics> + Send>>,
 }
 
 impl fmt::Debug for TokioTaskMetricsSet {
@@ -24,9 +25,22 @@ impl fmt::Debug for TokioTaskMetricsSet {
     }
 }
 
+impl TokioTaskMetricsSet {
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+}
+
+impl TokioTaskMetricsSetBuilder {
+    pub fn monitor(&mut self, monitor: &TaskMonitor) -> &Self {
+        self.monitor = Some(Arc::new(Mutex::new(monitor.intervals())));
+        self
+    }
+}
+
 impl MetricsSet for TokioTaskMetricsSet {
     fn get_all(&self) -> HashMap<String, Metric> {
-        let metrics: TaskMetrics = self.monitor.cumulative();
+        let metrics: TaskMetrics = self.monitor.lock().unwrap().next().unwrap();
 
         let mut result = HashMap::new();
         result.insert(
@@ -74,16 +88,15 @@ impl MetricsSet for TokioTaskMetricsSet {
 #[derive(Builder)]
 pub struct TokioRuntimeMetricsSet {
     name: String,
+    #[builder(setter(custom))]
     monitor: Arc<Mutex<dyn Iterator<Item = RuntimeMetrics> + Send>>,
 }
 
 #[cfg(feature = "rt")]
-impl TokioRuntimeMetricsSet {
-    pub fn new(runtime_monitor: RuntimeMonitor) -> TokioRuntimeMetricsSet {
-        TokioRuntimeMetricsSet {
-            name: "default".to_owned(),
-            monitor: Arc::new(Mutex::new(runtime_monitor.intervals())),
-        }
+impl TokioRuntimeMetricsSetBuilder {
+    pub fn monitor(&mut self, monitor: &RuntimeMonitor) -> &Self {
+        self.monitor = Some(Arc::new(Mutex::new(monitor.intervals())));
+        self
     }
 }
 
