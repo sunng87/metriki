@@ -16,4 +16,4 @@ documentation = "https://docs.rs/metriki-log-reporter/"
 log = "0.4"
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 #metriki-core = "0.1.1"
-derive_builder = "0.10.2"
+derive_builder = "0.11.1"
