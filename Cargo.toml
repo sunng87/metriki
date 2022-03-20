@@ -10,6 +10,7 @@ members = ["metriki-core",
            "metriki-r2d2",
            "metriki-riemann-reporter",
            "metriki-statsd-reporter",
+           "metriki-tokio",
            "metriki-tower",
            "metriki-tracing",
            "metriki-warp"]
