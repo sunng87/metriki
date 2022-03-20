@@ -77,7 +77,29 @@ impl MetricsSet for TokioTaskMetricsSet {
             Metric::gauge(Box::new(StaticGauge(metrics.total_fast_poll_count as f64))).into(),
         );
 
-        // TODO: duration/delay metrics
+        result.insert(
+            format!("{}.mean_poll_duration", self.name),
+            Metric::gauge(Box::new(StaticGauge(
+                metrics.mean_poll_duration().as_millis() as f64,
+            )))
+            .into(),
+        );
+
+        result.insert(
+            format!("{}.mean_first_poll_delay", self.name),
+            Metric::gauge(Box::new(StaticGauge(
+                metrics.mean_first_poll_delay().as_millis() as f64,
+            )))
+            .into(),
+        );
+
+        result.insert(
+            format!("{}.mean_scheduled_duration", self.name),
+            Metric::gauge(Box::new(StaticGauge(
+                metrics.mean_scheduled_duration().as_millis() as f64,
+            )))
+            .into(),
+        );
 
         result
     }
@@ -156,7 +178,18 @@ impl MetricsSet for TokioRuntimeMetricsSet {
             Metric::gauge(Box::new(StaticGauge(metrics.total_noop_count as f64))).into(),
         );
 
-        // TODO: duration/delay metrics
+        result.insert(
+            format!("{}.total_busy_duration", self.name),
+            Metric::gauge(Box::new(StaticGauge(
+                metrics.total_busy_duration.as_millis() as f64,
+            )))
+            .into(),
+        );
+
+        result.insert(
+            format!("{}.busy_ratio", self.name),
+            Metric::gauge(Box::new(StaticGauge(metrics.busy_ratio()))).into(),
+        );
 
         result
     }
