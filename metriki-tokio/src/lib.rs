@@ -1,3 +1,29 @@
+//! # Metriki Tokio Instrument
+//!
+//! This library provides
+//! [tokio-metrics](https://github.com/tokio/tokio-metrics)
+//! integration for metriki.
+//!
+//! # Setup
+//!
+//! This library provides `RuntimeMetrics` by default. Accroding to
+//! tokio-metrics, `tokio_unstable` is required for this feature. See
+//! the
+//! [doc](https://github.com/tokio-rs/tokio-metrics#getting-started-with-runtime-metrics)
+//! for steps to setup the cargo configuration.
+//!
+//! To disable unstable features, you can include this library with
+//! `default-features = false`.
+//!
+//! # Usage
+//!
+//! [An
+//! Example](https://github.com/sunng87/metriki/blob/master/metriki-tokio/examples/server.rs)
+//! is provided in the codebase.
+//!
+//! Check [docs of tokio-metrics](https://docs.rs/tokio-metrics/) for
+//! meaning of the metrics.
+//!
 use std::collections::HashMap;
 use std::fmt::{self};
 use std::sync::{Arc, Mutex};

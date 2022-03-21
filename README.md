@@ -55,7 +55,10 @@ InfluxDbReporterBuilder::default()
   - [x] r2d2: monitoring database connection usage
         [(doc)](https://docs.rs/metriki-r2d2/)
         [(crate)](https://crates.io/crates/metriki-r2d2).
-
+  - [x] tokio: monitoring tokio internals using
+        [tokio_metrics](https://github.com/tokio/tokio-metrics)
+        [(doc)](https://docs.rs/metriki-tokio/)
+        [(crate)](https://crates.io/crates/metriki-tokio).
 
 ## Concepts
 
