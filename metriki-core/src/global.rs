@@ -8,9 +8,7 @@ use crate::registry::MetricsRegistry;
 pub fn global_registry() -> Arc<MetricsRegistry> {
     static GLOBAL_REGISTRY: OnceCell<Arc<MetricsRegistry>> = OnceCell::new();
 
-    GLOBAL_REGISTRY
-        .get_or_init(|| MetricsRegistry::arc())
-        .clone()
+    GLOBAL_REGISTRY.get_or_init(MetricsRegistry::arc).clone()
 }
 
 #[cfg(test)]
