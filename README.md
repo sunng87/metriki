@@ -24,9 +24,14 @@ let registry = global_registry();
 
 // start a reporter to send data into influxdb
 InfluxDbReporterBuilder::default()
-  .registry(registry.clone())
-  .build()
-  .start();
+    .url("localhost:8086")
+    .username(String::from("influxdbuser"))
+    .password(String::from("yourpassword"))
+    .database("db")
+    .registry(registry.clone())
+    .build()
+    .unwrap()
+    .start();
 
 ```
 
