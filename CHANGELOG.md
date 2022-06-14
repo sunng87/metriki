@@ -1,5 +1,11 @@
 # Change Log
 
+## Tracing [0.2.0] - 2022-06-14
+
+### Changed
+
+* Update tracing-subscriber to 0.3
+
 ## Core [1.7.2] - 2022-01-26
 
 ### Changed
