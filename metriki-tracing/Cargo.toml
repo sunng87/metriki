@@ -20,4 +20,4 @@ metriki-core = { path = "../metriki-core", version = "^1.7"}
 
 [dev-dependencies]
 metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.1" }
-env_logger = "0.8"
+env_logger = "0.9"
