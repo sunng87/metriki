@@ -24,5 +24,5 @@ tokio = { version = "1", features = ["full"] }
 hyper = { version = "0.14", features = ["full"]}
 
 [features]
-default = ["rt"]
-rt = []
+default = []
+rt = ["tokio-metrics/rt"]
