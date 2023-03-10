@@ -170,8 +170,10 @@ impl ExponentiallyWeightedMovingAverages {
         let tick_age = (current_tick - previous_tick).as_millis() as u64;
 
         if tick_age > DEFAULT_INTERVAL_MILLIS {
-            let latest_tick =
-                current_tick - Duration::from_millis(tick_age % DEFAULT_INTERVAL_MILLIS);
+            let latest_tick = current_tick
+                .checked_sub(Duration::from_millis(tick_age % DEFAULT_INTERVAL_MILLIS))
+                .unwrap();
+
             if self
                 .last_tick
                 .compare_exchange(previous_tick, latest_tick)

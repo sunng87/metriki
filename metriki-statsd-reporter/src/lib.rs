@@ -86,24 +86,14 @@ impl StatsdReporter {
     }
 
     fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot, client: &StatsdClient) {
-        self.send(
-            client.histogram_with_tags(&format!("{}.p50", name), snapshot.quantile(0.5) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p75", name), snapshot.quantile(0.75) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p90", name), snapshot.quantile(0.9) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p99", name), snapshot.quantile(0.99) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p999", name), snapshot.quantile(0.999) as u64),
-        );
-        self.send(client.histogram_with_tags(&format!("{}.min", name), snapshot.min() as u64));
-        self.send(client.histogram_with_tags(&format!("{}.max", name), snapshot.max() as u64));
-        self.send(client.histogram_with_tags(&format!("{}.mean", name), snapshot.mean() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.p50", name), snapshot.quantile(0.5)));
+        self.send(client.histogram_with_tags(&format!("{}.p75", name), snapshot.quantile(0.75)));
+        self.send(client.histogram_with_tags(&format!("{}.p90", name), snapshot.quantile(0.9)));
+        self.send(client.histogram_with_tags(&format!("{}.p99", name), snapshot.quantile(0.99)));
+        self.send(client.histogram_with_tags(&format!("{}.p999", name), snapshot.quantile(0.999)));
+        self.send(client.histogram_with_tags(&format!("{}.min", name), snapshot.min()));
+        self.send(client.histogram_with_tags(&format!("{}.max", name), snapshot.max()));
+        self.send(client.histogram_with_tags(&format!("{}.mean", name), snapshot.mean()));
         self.send(client.histogram_with_tags(&format!("{}.count", name), snapshot.count()));
     }
 
@@ -115,24 +105,14 @@ impl StatsdReporter {
         let rate = t.rate();
         let latency = t.latency();
 
-        self.send(
-            client.histogram_with_tags(&format!("{}.p50", name), latency.quantile(0.5) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p75", name), latency.quantile(0.75) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p90", name), latency.quantile(0.9) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p99", name), latency.quantile(0.99) as u64),
-        );
-        self.send(
-            client.histogram_with_tags(&format!("{}.p999", name), latency.quantile(0.999) as u64),
-        );
-        self.send(client.histogram_with_tags(&format!("{}.min", name), latency.min() as u64));
-        self.send(client.histogram_with_tags(&format!("{}.max", name), latency.max() as u64));
-        self.send(client.histogram_with_tags(&format!("{}.mean", name), latency.mean() as u64));
+        self.send(client.histogram_with_tags(&format!("{}.p50", name), latency.quantile(0.5)));
+        self.send(client.histogram_with_tags(&format!("{}.p75", name), latency.quantile(0.75)));
+        self.send(client.histogram_with_tags(&format!("{}.p90", name), latency.quantile(0.9)));
+        self.send(client.histogram_with_tags(&format!("{}.p99", name), latency.quantile(0.99)));
+        self.send(client.histogram_with_tags(&format!("{}.p999", name), latency.quantile(0.999)));
+        self.send(client.histogram_with_tags(&format!("{}.min", name), latency.min()));
+        self.send(client.histogram_with_tags(&format!("{}.max", name), latency.max()));
+        self.send(client.histogram_with_tags(&format!("{}.mean", name), latency.mean()));
         self.send(client.histogram_with_tags(&format!("{}.count", name), latency.count()));
 
         self.send(client.meter_with_tags(&format!("{}.m1_rate", name), rate.m1_rate() as u64));

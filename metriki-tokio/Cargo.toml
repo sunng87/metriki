@@ -13,7 +13,7 @@ documentation = "https://docs.rs/metriki-tokio/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-metrics = { version = "0.1" }
+tokio-metrics = { version = "0.2" }
 metriki-core = { path = "../metriki-core", version = "^1.0"}
 derive_builder = "0.12"
 
@@ -24,5 +24,5 @@ tokio = { version = "1", features = ["full"] }
 hyper = { version = "0.14", features = ["full"]}
 
 [features]
-default = ["rt"]
-rt = []
+default = []
+rt = ["tokio-metrics/rt"]

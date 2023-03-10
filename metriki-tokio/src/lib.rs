@@ -25,14 +25,16 @@
 //! meaning of the metrics.
 //!
 use std::collections::HashMap;
-use std::fmt::{self};
+use std::fmt;
 use std::sync::{Arc, Mutex};
 
 use derive_builder::Builder;
 use metriki_core::metrics::{Metric, StaticGauge};
 use metriki_core::MetricsSet;
 
-use tokio_metrics::{RuntimeMetrics, RuntimeMonitor, TaskMetrics, TaskMonitor};
+#[cfg(feature = "rt")]
+use tokio_metrics::{RuntimeMetrics, RuntimeMonitor};
+use tokio_metrics::{TaskMetrics, TaskMonitor};
 
 /// A MetricsSet works with tokio_metrics `TaskMonitor`.
 ///

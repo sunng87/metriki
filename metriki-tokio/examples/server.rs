@@ -6,8 +6,12 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server};
 use metriki_core::MetricsRegistry;
 use metriki_log_reporter::LogReporterBuilder;
-use metriki_tokio::{TokioRuntimeMetricsSetBuilder, TokioTaskMetricsSetBuilder};
-use tokio_metrics::{RuntimeMonitor, TaskMonitor};
+#[cfg(feature = "rt")]
+use metriki_tokio::TokioRuntimeMetricsSetBuilder;
+use metriki_tokio::TokioTaskMetricsSetBuilder;
+#[cfg(feature = "rt")]
+use tokio_metrics::RuntimeMonitor;
+use tokio_metrics::TaskMonitor;
 
 async fn hello_world(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
     Ok(Response::new("Hello, World".into()))
@@ -16,8 +20,6 @@ async fn hello_world(_req: Request<Body>) -> Result<Response<Body>, Infallible> 
 #[tokio::main]
 async fn main() {
     env_logger::init();
-    let handle = tokio::runtime::Handle::current();
-    let runtime_monitor = RuntimeMonitor::new(&handle);
 
     let registry = MetricsRegistry::arc();
     LogReporterBuilder::default()
@@ -34,15 +36,20 @@ async fn main() {
         .build()
         .unwrap();
     registry.register_metrics_set(&task_metrics_set.name().clone(), Arc::new(task_metrics_set));
-    let runtime_metrics_set = TokioRuntimeMetricsSetBuilder::default()
-        .name("current_runtime")
-        .monitor(&runtime_monitor)
-        .build()
-        .unwrap();
-    registry.register_metrics_set(
-        &runtime_metrics_set.name().clone(),
-        Arc::new(runtime_metrics_set),
-    );
+    #[cfg(feature = "rt")]
+    {
+        let handle = tokio::runtime::Handle::current();
+        let runtime_monitor = RuntimeMonitor::new(&handle);
+        let runtime_metrics_set = TokioRuntimeMetricsSetBuilder::default()
+            .name("current_runtime")
+            .monitor(&runtime_monitor)
+            .build()
+            .unwrap();
+        registry.register_metrics_set(
+            &runtime_metrics_set.name().clone(),
+            Arc::new(runtime_metrics_set),
+        );
+    }
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
 
