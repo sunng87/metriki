@@ -1,5 +1,11 @@
 # Change Log
 
+## Core [1.7.5] - 2023-08-24
+
+### Fixed
+
+* Fixed issue with histogram storing historical data [#90]
+
 ## Tracing [0.2.0] - 2022-06-14
 
 ### Changed
