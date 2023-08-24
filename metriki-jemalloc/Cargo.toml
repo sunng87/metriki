@@ -14,7 +14,7 @@ documentation = "https://docs.rs/metriki-jemalloc/"
 
 [dependencies]
 tikv-jemalloc-ctl = "0.5"
-metriki-core = { path = "../metriki-core", version = "^1.0"}
+metriki-core = { path = "../metriki-core", version = "^1.7" }
 
 [dev-dependencies]
 tikv-jemallocator = "0.5"

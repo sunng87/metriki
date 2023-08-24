@@ -19,7 +19,7 @@ quote = "1"
 proc-macro2 = "1"
 
 [dev-dependencies]
-metriki-core = { path = "../metriki-core", version = "^1.0"}
+metriki-core = { path = "../metriki-core", version = "^1.7" }
 
 [lib]
 proc-macro = true
