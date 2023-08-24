@@ -3,7 +3,9 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, Expr, ItemFn, Lit, LitStr, Meta, Result as SynResult, Token};
+use syn::{
+    parse_macro_input, Expr, ExprLit, ItemFn, Lit, LitStr, Meta, Result as SynResult, Token,
+};
 
 struct FnMetricsAttributes {
     registry: Expr,
@@ -23,14 +25,21 @@ impl Parse for FnMetricsAttributes {
         for i in metas {
             if let Meta::NameValue(mnv) = i {
                 if mnv.path.is_ident("name") {
-                    if let Lit::Str(ref litstr) = mnv.lit {
+                    if let Expr::Lit(ExprLit {
+                        lit: Lit::Str(litstr),
+                        ..
+                    }) = &mnv.value
+                    {
                         result.name = Some(Lit::Str(litstr.clone()));
                     }
                 }
 
                 if mnv.path.is_ident("registry") {
-                    if let Lit::Str(ref litstr) = mnv.lit {
-                        result.registry = syn::parse_str(&litstr.value())?;
+                    if let Expr::Lit(ExprLit {
+                        lit: Lit::Str(reg), ..
+                    }) = &mnv.value
+                    {
+                        result.registry = syn::parse_str(&reg.value())?;
                     }
                 }
             }
