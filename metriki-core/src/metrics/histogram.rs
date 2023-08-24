@@ -20,7 +20,7 @@ pub struct Histogram {
 
 #[derive(Debug)]
 pub struct HistogramSnapshot {
-    inner: Arc<RwLock<HdrHistogram<u64>>>,
+    inner: HdrHistogram<u64>,
 }
 
 impl Histogram {
@@ -40,34 +40,36 @@ impl Histogram {
     }
 
     pub fn snapshot(&self) -> HistogramSnapshot {
-        let snapshot = self.inner.clone();
-        HistogramSnapshot { inner: snapshot }
+        let mut hist = HdrHistogram::<u64>::new_with_bounds(1, DEFAULT_RANGE_MAX, 2).unwrap();
+        let mut inner = self.inner.write().unwrap();
+        std::mem::swap(&mut hist, &mut *inner);
+        HistogramSnapshot { inner: hist }
     }
 }
 
 impl HistogramSnapshot {
     pub fn count(&self) -> u64 {
-        self.inner.read().unwrap().len()
+        self.inner.len()
     }
 
     pub fn mean(&self) -> f64 {
-        self.inner.read().unwrap().mean()
+        self.inner.mean()
     }
 
     pub fn max(&self) -> u64 {
-        self.inner.read().unwrap().max()
+        self.inner.max()
     }
 
     pub fn min(&self) -> u64 {
-        self.inner.read().unwrap().min()
+        self.inner.min()
     }
 
     pub fn stddev(&self) -> f64 {
-        self.inner.read().unwrap().stdev()
+        self.inner.stdev()
     }
 
     pub fn quantile(&self, quantile: f64) -> u64 {
-        self.inner.read().unwrap().value_at_quantile(quantile)
+        self.inner.value_at_quantile(quantile)
     }
 }
 
@@ -112,6 +114,25 @@ mod test {
 
         assert_eq!(4, snapshot.count());
         assert_eq!(0, snapshot.min());
-        // assert_eq!(DEFAULT_RANGE_MAX, snapshot.max());
+
+        histogram.update(0);
+        histogram.update(1);
+        histogram.update(1000);
+        histogram.update(DEFAULT_RANGE_MAX + 1);
+
+        let snapshot = histogram.snapshot();
+
+        assert_eq!(4, snapshot.count());
+        assert_eq!(0, snapshot.min());
+    }
+
+    #[test]
+    fn test_empty_histogram_range() {
+        let histogram = Histogram::new();
+        let snapshot = histogram.snapshot();
+
+        assert_eq!(0, snapshot.count());
+        assert_eq!(0, snapshot.min());
+        assert_eq!(0, snapshot.quantile(0.9));
     }
 }
