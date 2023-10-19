@@ -6,6 +6,7 @@ use derive_builder::Builder;
 use influxdb::{Client, InfluxDbWriteable, Timestamp, WriteQuery};
 
 use log::warn;
+use metriki_core::key::Key;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 use tokio::time::{sleep, Duration};
@@ -111,20 +112,19 @@ impl InfluxDbReporter {
         }
     }
 
-    fn report_meter(&self, name: &str, meter: &Meter) -> WriteQuery {
-        self.with_query(name)
+    fn report_meter(&self, key: &Key, meter: &Meter) -> WriteQuery {
+        self.with_key(key)
             .add_field("m1", meter.m1_rate())
             .add_field("m5", meter.m5_rate())
             .add_field("m15", meter.m15_rate())
     }
-
-    fn report_gauge(&self, name: &str, gauge: &Gauge) -> WriteQuery {
+    fn report_gauge(&self, key: &Key, gauge: &Gauge) -> WriteQuery {
         let value = gauge.value();
-        self.with_query(name).add_field("value", value)
+        self.with_key(key).add_field("value", value)
     }
 
-    fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot) -> WriteQuery {
-        self.with_query(name)
+    fn report_histogram(&self, key: &Key, snapshot: &HistogramSnapshot) -> WriteQuery {
+        self.with_key(key)
             .add_field("p50", snapshot.quantile(0.5))
             .add_field("p75", snapshot.quantile(0.75))
             .add_field("p90", snapshot.quantile(0.90))
@@ -135,15 +135,15 @@ impl InfluxDbReporter {
             .add_field("mean", snapshot.mean())
     }
 
-    fn report_counter(&self, name: &str, c: &Counter) -> WriteQuery {
-        self.with_query(name).add_field("value", c.value())
+    fn report_counter(&self, key: &Key, c: &Counter) -> WriteQuery {
+        self.with_key(key).add_field("value", c.value())
     }
 
-    fn report_timer(&self, name: &str, t: &Timer) -> WriteQuery {
+    fn report_timer(&self, key: &Key, t: &Timer) -> WriteQuery {
         let rate = t.rate();
         let latency = t.latency();
 
-        self.with_query(name)
+        self.with_key(key)
             .add_field("p50", latency.quantile(0.5))
             .add_field("p75", latency.quantile(0.75))
             .add_field("p90", latency.quantile(0.90))
@@ -155,5 +155,13 @@ impl InfluxDbReporter {
             .add_field("m1", rate.m1_rate())
             .add_field("m5", rate.m5_rate())
             .add_field("m15", rate.m15_rate())
+    }
+
+    fn with_key(&self, key: &Key) -> WriteQuery {
+        let mut wq = self.with_query(key.key());
+        for tag in key.tags() {
+            wq = wq.add_tag(tag.key(), tag.value());
+        }
+        wq
     }
 }

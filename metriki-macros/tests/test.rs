@@ -4,6 +4,7 @@ extern crate metriki_macros;
 use std::sync::Arc;
 
 use metriki_core::global::global_registry;
+use metriki_core::key::Key;
 use metriki_core::MetricsRegistry;
 
 #[timed(name = "my.example.f1")]
@@ -29,7 +30,7 @@ fn test_my_example_f1() {
     my_example_f1();
 
     let s = global_registry().snapshots();
-    assert!(s.contains_key("my.example.f1"));
+    assert!(s.contains_key(&Key::from_name("my.example.f1")));
 }
 
 #[test]
@@ -37,7 +38,7 @@ fn test_my_example_f2() {
     my_example_f2();
 
     let s = global_registry().snapshots();
-    assert!(s.contains_key("my_example_f2"));
+    assert!(s.contains_key(&Key::from_name("my_example_f2")));
 }
 
 #[test]
@@ -46,7 +47,7 @@ fn test_my_example_f3() {
     my_example_f3(local_registry.clone());
 
     let s = local_registry.snapshots();
-    assert!(s.contains_key("my_example_f3"));
+    assert!(s.contains_key(&Key::from_name("my_example_f3")));
 }
 
 #[test]
@@ -54,5 +55,5 @@ fn test_my_example_f4() {
     my_example_f4();
 
     let s = global_registry().snapshots();
-    assert!(s.contains_key("my_example_f4"));
+    assert!(s.contains_key(&Key::from_name("my_example_f4")));
 }

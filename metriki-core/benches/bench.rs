@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use rand;
+
 use test::Bencher;
 use threadpool::ThreadPool;
 

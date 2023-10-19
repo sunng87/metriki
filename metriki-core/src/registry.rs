@@ -9,6 +9,7 @@ use serde::ser::SerializeMap;
 use serde::{Serialize, Serializer};
 
 use crate::filter::MetricsFilter;
+use crate::key::{Key, Tag};
 use crate::metrics::*;
 use crate::mset::MetricsSet;
 
@@ -30,7 +31,7 @@ impl Debug for MetricsRegistry {
 
 #[derive(Default, Debug)]
 struct Inner {
-    metrics: DashMap<String, Metric>,
+    metrics: DashMap<Key, Metric>,
     mset: DashMap<String, Arc<dyn MetricsSet + 'static>>,
 }
 
@@ -54,10 +55,20 @@ impl MetricsRegistry {
     ///
     /// This function may panic if a metric is already registered with type other than meter.
     pub fn meter(&self, name: &str) -> Arc<Meter> {
+        let key = Key::from_name(name);
+        self.do_meter(key)
+    }
+
+    pub fn meter_with_tags(&self, name: &str, tags: Vec<Tag>) -> Arc<Meter> {
+        let key = Key::from(name, tags);
+        self.do_meter(key)
+    }
+
+    fn do_meter(&self, key: Key) -> Arc<Meter> {
         let meter = {
             self.inner
                 .metrics
-                .get(name)
+                .get(&key)
                 .as_deref()
                 .map(|metric| match metric {
                     Metric::Meter(ref m) => m.clone(),
@@ -71,12 +82,11 @@ impl MetricsRegistry {
             m
         } else {
             let meter = Arc::new(Meter::new());
-            self.inner
-                .metrics
-                .insert(name.to_owned(), Metric::Meter(meter.clone()));
+            self.inner.metrics.insert(key, Metric::Meter(meter.clone()));
             meter
         }
     }
+
 
     /// Return `Histogram` that has been registered and create if not found.
     ///
@@ -87,10 +97,20 @@ impl MetricsRegistry {
     ///
     /// This function may panic if a metric is already registered with type other than histogram.
     pub fn histogram(&self, name: &str) -> Arc<Histogram> {
+        let key = Key::from_name(name);
+        self.do_histogram(key)
+    }
+
+    pub fn histogram_with_tags(&self, name: &str, tags: Vec<Tag>) -> Arc<Histogram> {
+        let key = Key::from(name, tags);
+        self.do_histogram(key)
+    }
+
+    fn do_histogram(&self, key: Key) -> Arc<Histogram> {
         let histo = {
             self.inner
                 .metrics
-                .get(name)
+                .get(&key)
                 .as_deref()
                 .map(|metric| match metric {
                     Metric::Histogram(ref m) => m.clone(),
@@ -106,7 +126,7 @@ impl MetricsRegistry {
             let histo = Arc::new(Histogram::new());
             self.inner
                 .metrics
-                .insert(name.to_owned(), Metric::Histogram(histo.clone()));
+                .insert(key, Metric::Histogram(histo.clone()));
             histo
         }
     }
@@ -119,10 +139,20 @@ impl MetricsRegistry {
     ///
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn counter(&self, name: &str) -> Arc<Counter> {
+        let key = Key::from_name(name);
+        self.do_counter(key)
+    }
+
+    pub fn counter_with_tags(&self, name: &str, tags: Vec<Tag>) -> Arc<Counter> {
+        let key = Key::from(name, tags);
+        self.do_counter(key)
+    }
+
+    fn do_counter(&self, key: Key) -> Arc<Counter> {
         let counter = {
             self.inner
                 .metrics
-                .get(name)
+                .get(&key)
                 .as_deref()
                 .map(|metric| match metric {
                     Metric::Counter(ref m) => m.clone(),
@@ -138,7 +168,7 @@ impl MetricsRegistry {
             let counter = Arc::new(Counter::new());
             self.inner
                 .metrics
-                .insert(name.to_owned(), Metric::Counter(counter.clone()));
+                .insert(key, Metric::Counter(counter.clone()));
             counter
         }
     }
@@ -152,10 +182,20 @@ impl MetricsRegistry {
     ///
     /// This function may panic if a metric is already registered with type other than counter.
     pub fn timer(&self, name: &str) -> Arc<Timer> {
+        let key = Key::from_name(name);
+        self.do_timer(key)
+    }
+
+    pub fn timer_with_tags(&self, name: &str, tags: Vec<Tag>) -> Arc<Timer> {
+        let key = Key::from(name, tags);
+        self.do_timer(key)
+    }
+
+    fn do_timer(&self, key: Key) -> Arc<Timer> {
         let timer = {
             self.inner
                 .metrics
-                .get(name)
+                .get(&key)
                 .as_deref()
                 .map(|metric| match metric {
                     Metric::Timer(ref m) => m.clone(),
@@ -169,9 +209,7 @@ impl MetricsRegistry {
             m
         } else {
             let timer = Arc::new(Timer::new());
-            self.inner
-                .metrics
-                .insert(name.to_owned(), Metric::Timer(timer.clone()));
+            self.inner.metrics.insert(key, Metric::Timer(timer.clone()));
             timer
         }
     }
@@ -180,23 +218,33 @@ impl MetricsRegistry {
     ///
     /// The guage will return a value when any reporter wants to fetch data from it.
     pub fn gauge(&self, name: &str, func: Box<dyn GaugeFn>) {
+        let key = Key::from_name(name);
+        self.do_gauge(key, func)
+    }
+
+    pub fn gauge_with_tags(&self, name: &str, tags: Vec<Tag>, func: Box<dyn GaugeFn>) {
+        let key = Key::from(name, tags);
+        self.do_gauge(key, func)
+    }
+
+    fn do_gauge(&self, key: Key, func: Box<dyn GaugeFn>) {
         self.inner
             .metrics
-            .insert(name.to_owned(), Metric::Gauge(Arc::new(Gauge::new(func))));
+            .insert(key, Metric::Gauge(Arc::new(Gauge::new(func))));
     }
 
     /// Returns all the metrics hold in the registry.
     /// Metrics is filtered if a filter is set for this registry.
     ///
     /// This is useful for reporters to fetch all values from the registry.
-    pub fn snapshots(&self) -> HashMap<String, Metric> {
+    pub fn snapshots(&self) -> HashMap<Key, Metric> {
         let filter = self.filter.as_ref();
-        let mut results: HashMap<String, Metric> = HashMap::new();
+        let mut results: HashMap<Key, Metric> = HashMap::new();
 
         let metrics = self.inner.metrics.clone();
         for (k, v) in metrics.into_read_only().iter() {
-            if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
-                results.insert(k.to_string(), v.clone());
+            if filter.map(|f| f.accept(k.name.as_str(), v)).unwrap_or(true) {
+                results.insert(k.to_owned(), v.clone());
             }
         }
         let mset = self.inner.mset.clone();
@@ -204,7 +252,7 @@ impl MetricsRegistry {
             let metrics = metrics_set.get_all();
             for (k, v) in metrics.iter() {
                 if filter.map(|f| f.accept(k, v)).unwrap_or(true) {
-                    results.insert(k.clone(), v.clone());
+                    results.insert(Key::from_name(k), v.clone());
                 }
             }
         }
@@ -269,8 +317,8 @@ mod test {
 #[cfg(feature = "ser")]
 impl Serialize for MetricsRegistry {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
+        where
+            S: Serializer,
     {
         let snapshot = self.snapshots();
         let mut map = serializer.serialize_map(Some(snapshot.len()))?;

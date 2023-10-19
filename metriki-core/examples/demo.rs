@@ -1,4 +1,5 @@
 use std::error::Error;
+use metriki_core::key::Tag;
 
 use metriki_core::MetricsRegistry;
 
@@ -27,6 +28,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "m1 rate for example.meter: {}",
         mr.meter("example.meter").m1_rate()
+    );
+
+    println!(
+        "m1 rate for example.meter with tags key => value: {}",
+        mr.meter_with_tags("example.meter", vec![Tag::new("key", "value")]).m1_rate()
     );
 
     // counter demo

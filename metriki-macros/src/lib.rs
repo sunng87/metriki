@@ -49,7 +49,7 @@ impl Parse for FnMetricsAttributes {
     }
 }
 
-/// `timed` macro is design as an attibute for function.
+/// `timed` macro is design as an attribute for function.
 ///
 /// The macro adds timer metric for the function execution.
 ///

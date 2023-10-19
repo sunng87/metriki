@@ -92,6 +92,7 @@
 
 mod filter;
 pub mod global;
+pub mod key;
 pub mod metrics;
 mod mset;
 mod registry;
