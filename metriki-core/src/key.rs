@@ -1,16 +1,19 @@
+#[cfg(feature = "ser")]
+use serde::Serialize;
 use std::cmp;
 use std::hash::{Hash, Hasher};
-use serde::Serialize;
 
 pub type KeyName = String;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "ser", derive(Serialize))]
 pub struct Key {
     pub(crate) name: KeyName,
     pub(crate) tags: Vec<Tag>,
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, PartialOrd, Ord, Serialize)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug, PartialOrd, Ord)]
+#[cfg_attr(feature = "ser", derive(Serialize))]
 pub struct Tag {
     key: String,
     value: String,
