@@ -19,7 +19,7 @@ dashmap = "5.1"
 
 # optionals
 ## serialization
-serde = { version = "1", optional = true }
+serde = { version = "1", optional = true, features = ["derive"] }
 
 ## macros
 metriki-macros = { version = "1", path = "../metriki-macros", optional = true }
