@@ -20,6 +20,6 @@ mod test {
         let registry = global_registry();
         registry.meter("hello").mark();
 
-        assert!(registry.snapshots().len() > 0);
+        assert!(!registry.snapshots().is_empty());
     }
 }

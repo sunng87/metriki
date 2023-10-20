@@ -24,11 +24,11 @@ impl LogReporter {
             let metrics = self.registry.snapshots();
             for (ref key, metric) in metrics {
                 match metric {
-                    Metric::Counter(c) => self.report_counter(key, c.as_ref()),
-                    Metric::Gauge(g) => self.report_gauge(key, g.as_ref()),
-                    Metric::Timer(t) => self.report_timer(key, t.as_ref()),
-                    Metric::Meter(m) => self.report_meter(key, m.as_ref()),
-                    Metric::Histogram(h) => self.report_histogram(key, &h.snapshot()),
+                    Metric::Counter(c) => self.report_counter(key.key(), c.as_ref()),
+                    Metric::Gauge(g) => self.report_gauge(key.key(), g.as_ref()),
+                    Metric::Timer(t) => self.report_timer(key.key(), t.as_ref()),
+                    Metric::Meter(m) => self.report_meter(key.key(), m.as_ref()),
+                    Metric::Histogram(h) => self.report_histogram(key.key(), &h.snapshot()),
                 }
             }
 

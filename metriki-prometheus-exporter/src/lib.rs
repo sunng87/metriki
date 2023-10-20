@@ -3,11 +3,12 @@ use std::thread;
 
 use derive_builder::Builder;
 use log::warn;
+use metriki_core::key::Key;
 use metriki_core::metrics::*;
 use metriki_core::MetricsRegistry;
 use prometheus::proto::{
-    Counter as PromethuesCount, Gauge as PromethuesGauge, Metric as PrometheusMetric, MetricFamily,
-    MetricType, Quantile, Summary,
+    Counter as PromethuesCount, Gauge as PromethuesGauge, LabelPair, Metric as PrometheusMetric,
+    MetricFamily, MetricType, Quantile, Summary,
 };
 use prometheus::{Encoder, TextEncoder};
 use tiny_http::{Response, Server};
@@ -92,27 +93,27 @@ impl PrometheusExporter {
         family
     }
 
-    fn report_meter(&self, name: &str, meter: &Meter) -> MetricFamily {
-        let mut family = self.new_metric_family(name, MetricType::COUNTER);
+    fn report_meter(&self, key: &Key, meter: &Meter) -> MetricFamily {
+        let mut family = self.new_metric_family(key.key(), MetricType::COUNTER);
 
-        let counter = new_counter(meter.count() as f64);
+        let counter = setup_tags(key, new_counter(meter.count() as f64));
 
         family.set_metric(vec![counter].into());
         family
     }
 
-    fn report_gauge(&self, name: &str, gauge: &Gauge) -> MetricFamily {
-        let mut family = self.new_metric_family(name, MetricType::GAUGE);
+    fn report_gauge(&self, key: &Key, gauge: &Gauge) -> MetricFamily {
+        let mut family = self.new_metric_family(key.key(), MetricType::GAUGE);
 
-        let metric = new_gauge(gauge.value());
+        let metric = setup_tags(key, new_gauge(gauge.value()));
         family.set_metric(vec![metric].into());
         family
     }
 
-    fn report_histogram(&self, name: &str, snapshot: &HistogramSnapshot) -> MetricFamily {
-        let mut family = self.new_metric_family(name, MetricType::SUMMARY);
+    fn report_histogram(&self, key: &Key, snapshot: &HistogramSnapshot) -> MetricFamily {
+        let mut family = self.new_metric_family(key.key(), MetricType::SUMMARY);
 
-        let mut metric = PrometheusMetric::new();
+        let mut metric = setup_tags(key, PrometheusMetric::new());
         let quantiles = vec![
             new_quantile(0.5, snapshot),
             new_quantile(0.75, snapshot),
@@ -127,21 +128,21 @@ impl PrometheusExporter {
         family
     }
 
-    fn report_counter(&self, name: &str, c: &Counter) -> MetricFamily {
-        let mut family = self.new_metric_family(name, MetricType::COUNTER);
+    fn report_counter(&self, key: &Key, c: &Counter) -> MetricFamily {
+        let mut family = self.new_metric_family(key.key(), MetricType::COUNTER);
 
-        let counter = new_counter(c.value() as f64);
+        let counter = setup_tags(key, new_counter(c.value() as f64));
 
         family.set_metric(vec![counter].into());
         family
     }
 
-    fn report_timer(&self, name: &str, t: &Timer) -> MetricFamily {
+    fn report_timer(&self, key: &Key, t: &Timer) -> MetricFamily {
         let rate = t.rate();
         let latency = t.latency();
 
-        let mut family = self.new_metric_family(name, MetricType::SUMMARY);
-        let mut metric = PrometheusMetric::new();
+        let mut family = self.new_metric_family(key.key(), MetricType::SUMMARY);
+        let mut metric = setup_tags(key, PrometheusMetric::new());
         let quantiles = vec![
             new_quantile(0.5, &latency),
             new_quantile(0.75, &latency),
@@ -156,4 +157,17 @@ impl PrometheusExporter {
         family.set_metric(vec![metric].into());
         family
     }
+}
+
+fn setup_tags(key: &Key, mut metric: PrometheusMetric) -> PrometheusMetric {
+    let labels = metric.mut_label();
+
+    for tag in key.tags() {
+        let mut lp = LabelPair::new();
+        lp.set_name(tag.key().to_string());
+        lp.set_value(tag.value().to_string());
+
+        labels.push(lp);
+    }
+    metric
 }

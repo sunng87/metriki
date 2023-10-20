@@ -48,11 +48,13 @@ impl StatsdReporter {
 
             for (key, metric) in metrics {
                 match metric {
-                    Metric::Counter(ref c) => self.report_counter(&key, c, &client),
-                    Metric::Gauge(ref g) => self.report_gauge(&key, g.as_ref(), &client),
-                    Metric::Timer(ref t) => self.report_timer(&key, t.as_ref(), &client),
-                    Metric::Meter(ref m) => self.report_meter(&key, m, &client),
-                    Metric::Histogram(ref h) => self.report_histogram(&key, &h.snapshot(), &client),
+                    Metric::Counter(ref c) => self.report_counter(key.key(), c, &client),
+                    Metric::Gauge(ref g) => self.report_gauge(key.key(), g.as_ref(), &client),
+                    Metric::Timer(ref t) => self.report_timer(key.key(), t.as_ref(), &client),
+                    Metric::Meter(ref m) => self.report_meter(key.key(), m, &client),
+                    Metric::Histogram(ref h) => {
+                        self.report_histogram(key.key(), &h.snapshot(), &client)
+                    }
                 }
             }
 

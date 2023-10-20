@@ -56,12 +56,14 @@ impl RiemannReporter {
                 let events: Vec<Event> = metrics
                     .iter()
                     .flat_map(|(key, metric)| match metric {
-                        Metric::Counter(c) => self.report_counter(key, c.as_ref()).into_iter(),
-                        Metric::Gauge(g) => self.report_gauge(key, g.as_ref()).into_iter(),
-                        Metric::Timer(t) => self.report_timer(key, t.as_ref()).into_iter(),
-                        Metric::Meter(m) => self.report_meter(key, m.as_ref()).into_iter(),
+                        Metric::Counter(c) => {
+                            self.report_counter(key.key(), c.as_ref()).into_iter()
+                        }
+                        Metric::Gauge(g) => self.report_gauge(key.key(), g.as_ref()).into_iter(),
+                        Metric::Timer(t) => self.report_timer(key.key(), t.as_ref()).into_iter(),
+                        Metric::Meter(m) => self.report_meter(key.key(), m.as_ref()).into_iter(),
                         Metric::Histogram(h) => {
-                            self.report_histogram(key, &h.snapshot()).into_iter()
+                            self.report_histogram(key.key(), &h.snapshot()).into_iter()
                         }
                     })
                     .collect();

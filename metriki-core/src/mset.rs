@@ -17,6 +17,7 @@ pub trait MetricsSet: Send + Sync + Debug {
 
 #[cfg(test)]
 mod test {
+    use crate::key::Key;
     use std::collections::HashMap;
     use std::sync::Arc;
 
@@ -48,7 +49,9 @@ mod test {
         let snapshots = registry.snapshots();
 
         assert_eq!(2, snapshots.len());
-        assert!(snapshots.get("test.set.counter").is_some());
-        assert!(snapshots.get("test.default.counter").is_some());
+        assert!(snapshots.get(&Key::from_name("test.set.counter")).is_some());
+        assert!(snapshots
+            .get(&Key::from_name("test.default.counter"))
+            .is_some());
     }
 }
