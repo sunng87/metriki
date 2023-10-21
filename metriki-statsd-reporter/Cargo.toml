@@ -12,7 +12,7 @@ documentation = "https://docs.rs/metriki-statsd-reporter/"
 readme = "../README.md"
 
 [dependencies]
-metriki-core = { path = "../metriki-core", version = "1"}
+metriki-core = { path = "../metriki-core", version = "^1.8"}
 cadence = "0.29"
 derive_builder = "0.12.0"
 log = "0.4"

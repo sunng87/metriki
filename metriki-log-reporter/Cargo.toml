@@ -14,6 +14,6 @@ documentation = "https://docs.rs/metriki-log-reporter/"
 
 [dependencies]
 log = "0.4"
-metriki-core = { path = "../metriki-core", version = "^1.7" }
+metriki-core = { path = "../metriki-core", version = "^1.8" }
 #metriki-core = "0.1.1"
 derive_builder = "0.12.0"
