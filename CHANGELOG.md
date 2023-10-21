@@ -1,5 +1,11 @@
 # Change Log
 
+## Core [1.8.0] - 2023-10-21
+
+### Added
+
+* Metrics tags [#95]
+
 ## Core [1.7.5] - 2023-08-24
 
 ### Fixed
