@@ -17,7 +17,7 @@ derive_builder = "0.12"
 diesel = { version = "2.0", features = ["r2d2"], optional = true }
 
 [dev-dependencies]
-metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.1" }
+metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.2" }
 env_logger = "0.10"
 
 [features]

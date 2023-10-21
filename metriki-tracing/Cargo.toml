@@ -19,5 +19,5 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["r
 metriki-core = { path = "../metriki-core", version = "^1.7"}
 
 [dev-dependencies]
-metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.1" }
+metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.2" }
 env_logger = "0.10"
