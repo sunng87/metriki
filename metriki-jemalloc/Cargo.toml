@@ -19,4 +19,4 @@ metriki-core = { path = "../metriki-core", version = "^1.7" }
 [dev-dependencies]
 tikv-jemallocator = "0.5"
 metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.2" }
-env_logger = "0.10"
+env_logger = "0.11"
