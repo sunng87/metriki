@@ -14,5 +14,5 @@ readme = "../README.md"
 [dependencies]
 metriki-core = { path = "../metriki-core", version = "^1.8"}
 cadence = "1.0"
-derive_builder = "0.12.0"
+derive_builder = "0.13.0"
 log = "0.4"
