@@ -16,7 +16,7 @@ readme = "../README.md"
 [dependencies]
 metriki-core = { path = "../metriki-core", version = "^1.8" }
 influxdb = "0.5.2"
-derive_builder = "0.13.0"
+derive_builder = "0.20.0"
 futures = { version = "0.3", features = ["executor"] }
 log = "0.4"
 tokio = { version = "1.0", default-features = false, features = ["net", "time"] }

@@ -13,7 +13,7 @@ readme = "../README.md"
 [dependencies]
 metriki-core = { path = "../metriki-core", version = "^1.7"}
 r2d2 = "0.8"
-derive_builder = "0.13"
+derive_builder = "0.20"
 diesel = { version = "2.0", features = ["r2d2"], optional = true }
 
 [dev-dependencies]
