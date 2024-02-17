@@ -15,7 +15,7 @@ documentation = "https://docs.rs/metriki-tokio/"
 [dependencies]
 tokio-metrics = { version = "0.3" }
 metriki-core = { path = "../metriki-core", version = "^1.7" }
-derive_builder = "0.13"
+derive_builder = "0.20"
 
 [dev-dependencies]
 metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.2" }
