@@ -15,7 +15,7 @@ readme = "../README.md"
 crossbeam-utils = "0.8"
 hdrhistogram = { version = "7", default-features = false, features = [] }
 once_cell = "1"
-dashmap = "5.1"
+dashmap = "6.1"
 
 # optionals
 ## serialization
