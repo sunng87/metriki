@@ -49,9 +49,7 @@ mod test {
         let snapshots = registry.snapshots();
 
         assert_eq!(2, snapshots.len());
-        assert!(snapshots.get(&Key::from_name("test.set.counter")).is_some());
-        assert!(snapshots
-            .get(&Key::from_name("test.default.counter"))
-            .is_some());
+        assert!(snapshots.contains_key(&Key::from_name("test.set.counter")));
+        assert!(snapshots.contains_key(&Key::from_name("test.default.counter")));
     }
 }

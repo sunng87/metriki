@@ -7,14 +7,14 @@
 //! It provides following metriki metrics:
 //!
 //! * `r2d2.checkout`: A meter records the rate of your application
-//! borrowing connection from the pool
+//!   borrowing connection from the pool
 //! * `r2d2.wait`: A histogram summarizes the distribution of time
-//! spent on borrowing connection from the pool
+//!   spent on borrowing connection from the pool
 //! * `r2d2.timeout`: A meter records the error rate of timeout
-//! borrowing connection
+//!   borrowing connection
 //! * `r2d2.usage`: A histogram summarizes the distribution of time
-//! for using the connection. Typically this is the time spent to
-//! query your database.
+//!   for using the connection. Typically this is the time spent to
+//!   query your database.
 //!
 //! ## Usage
 //!
