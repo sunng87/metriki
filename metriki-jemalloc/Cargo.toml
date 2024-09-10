@@ -13,10 +13,10 @@ documentation = "https://docs.rs/metriki-jemalloc/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tikv-jemalloc-ctl = "0.5"
+tikv-jemalloc-ctl = { version = "0.6", features = ["stats"] }
 metriki-core = { path = "../metriki-core", version = "^1.7" }
 
 [dev-dependencies]
-tikv-jemallocator = "0.5"
+tikv-jemallocator = "0.6"
 metriki-log-reporter = { path = "../metriki-log-reporter", version = "0.2" }
 env_logger = "0.11"
